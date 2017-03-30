@@ -189,6 +189,7 @@ Cnode* reads_from_courses_file(Cnode* course_list)
     return course_list;
 }
 
+
 /*************************************************************/
 /*             writes_to_courses_file function               */
 /* Function to write data from the memory to a file          */
@@ -245,4 +246,209 @@ Cnode* writes_to_courses_file(Cnode* course_list)
     /* Dont forget to close the file */
     fclose(fp);
     return course_list;
+}
+
+
+/*************************************************************/
+/*             writes_to_exams_file function                 */
+/* Function to write data from the memory to a file          */
+/* Receives the pointer to the first element of exams list   */
+/* Returns a pointer to the first element of exams list      */
+/*************************************************************/
+Enode* writes_to_exams_file(Enode* exam_list)
+{
+
+    FILE *fp;   /* pointer to file data type */
+    Enode* aux = exam_list -> next;
+    int i = 0;
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("\nDEBUG: writes_to_exams_file function called\n");
+    #endif
+
+    fp = fopen("exams_list.txt", "w+"); /* Opens the file in write+ mode */
+    /* If aux is null */
+    if (aux == NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: No entries on exams_list \n");
+        #endif
+        /* Then there is nothing to write on file and we can return */
+        fclose(fp);
+        return exam_list;
+    }
+
+    if (fp == NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: fp is Null -> Error opening file for writing\n");
+        #endif
+        printf("Erro a abrir o ficheiro para escrita\n");
+        fclose(fp);
+        return exam_list;
+    }
+
+    /* Iterate through student list nodes */
+    while (aux != NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: Writes something to file...\n");
+        #endif
+        fputs(aux -> course.name, fp); /* save course.name into file */
+        fputs("\n", fp);
+        fputs(aux -> course.regent, fp); /* save course.regent into file */
+        fputs("\n", fp);
+        fprintf(fp, "%d\n", aux-> period);
+        fprintf(fp, "%d\n", aux-> start_date.day);
+        fprintf(fp, "%d\n", aux-> start_date.month);
+        fprintf(fp, "%d\n", aux-> start_date.year);
+        fprintf(fp, "%d\n", aux-> start_date.hour);
+        fprintf(fp, "%d\n", aux-> start_date.minute);
+        fprintf(fp, "%d\n", aux-> end_date.day);
+        fprintf(fp, "%d\n", aux-> end_date.month);
+        fprintf(fp, "%d\n", aux-> end_date.year);
+        fprintf(fp, "%d\n", aux-> end_date.hour);
+        fprintf(fp, "%d\n", aux-> end_date.minute);
+        fprintf(fp, "%d\n", aux-> n_rooms);
+
+        for (i = 0; i < aux->n_rooms; i++)
+        {
+            fputs(aux-> rooms[i], fp);
+            fputs("\n", fp);
+        }
+
+        fprintf(fp, "%d\n", aux-> n_students);
+        aux = aux -> next;
+    }
+    /* Dont forget to close the file */
+    fclose(fp);
+    return exam_list;
+}
+
+
+/*************************************************************/
+/*              reads_from_exams_file function               */
+/* Function to read data stored in the files                 */
+/* Receives the pointer to the first element of exams list   */
+/* Returns a pointer to the first element of exams list      */
+/*************************************************************/
+Enode* reads_from_exams_file(Enode* exam_list)
+{
+
+    FILE *fp;   /* pointer to file data type */
+    char buffer[MAX_CHAR];  /* buffer to get data from file */
+    Enode* aux = exam_list;
+    Enode* new_exam = NULL;
+    Course crs;
+    Date sdate;
+    Date edate;
+    int i = 0;
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("\nDEBUG: reads_from_exams_file function called\n");
+    #endif
+
+    fp = fopen("exams_list.txt", "r"); /* Opens the file in read mode */
+    /* If fp is null */
+    if (fp == NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: No such file exams_list.txt\n");
+        #endif
+        /* Then there is no file and we can return */
+        fclose(fp);
+        return exam_list;
+    }
+
+    while (fgets(buffer, MAX_CHAR, fp) != NULL)
+    {
+        #ifdef DEBUG
+        printf("DEBUG: Reads something from file...\n");
+        #endif
+
+        new_exam = (Enode*) malloc (sizeof(Enode)); /* Alocates memory for new node */
+
+        removes_newLine(buffer); /* Removes new line from fgets */
+        crs.name = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to course.name */
+        strcpy(crs.name, buffer); /* Copies buffer content over to student.degree */
+
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        crs.regent = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to course.regent */
+        strcpy(crs.regent, buffer); /* Copies buffer content over to student.degree */
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        new_exam-> period = atoi(buffer);
+
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        sdate.day = atoi(buffer);
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        sdate.month = atoi(buffer);
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        sdate.year = atoi(buffer);
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        sdate.hour = atoi(buffer);
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        sdate.minute = atoi(buffer);
+
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        edate.day = atoi(buffer);
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        edate.month = atoi(buffer);
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        edate.year = atoi(buffer);
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        edate.hour = atoi(buffer);
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        edate.minute = atoi(buffer);
+
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        new_exam -> n_rooms = atoi(buffer);
+
+        for (i = 0; i < new_exam->n_rooms; i++)
+        {
+            fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+            removes_newLine(buffer); /* removes the new line from that line */
+            if ((new_exam -> rooms[i] = (char*) malloc (sizeof(char) * strlen(buffer))) == NULL)
+            {
+                printf("Erro: Sem memoria!\n");
+                /*DEBUG*/
+                #ifdef DEBUG
+                printf("DEBUG: NO MEMORY AVAILABLE! ERROR\n");
+                #endif
+                return exam_list;
+            }
+            strcpy(new_exam->rooms[i], buffer);
+        }
+
+        fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+        removes_newLine(buffer); /* removes the new line from that line */
+        new_exam -> n_students = atoi(buffer);
+
+
+        new_exam -> course = crs;
+        new_exam -> start_date = sdate;
+        new_exam -> end_date = edate;
+        new_exam -> next = NULL; /* Sets ->next to NULL */
+        aux -> next = new_exam; /* Adds new_course to course_list */
+        aux = new_exam;
+    }
+
+    fclose(fp); /* Don't forget to close the file */
+    return exam_list;
 }

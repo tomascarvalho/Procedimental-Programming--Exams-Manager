@@ -55,6 +55,7 @@ int main(int argc, char const *argv[]) {
     /*LOAD LISTS AND STRUCTURES FROM FILES HERE ....*/
     student_list = reads_from_students_file(student_list);
     course_list = reads_from_courses_file(course_list);
+    exam_list = reads_from_exams_file(exam_list);
     /* Save the system date in Date data type */
     get_currentDate(system_date);
 
@@ -159,6 +160,7 @@ int main(int argc, char const *argv[]) {
     /*SAVE SYSTEM STATE INTO FILES*/
     student_list = writes_to_students_file(student_list);
     course_list = writes_to_courses_file(course_list);
+    exam_list = writes_to_exams_file(exam_list);
     /* Destroy linked lists from memory */
     destroy_student_list(student_list);
     destroy_course_list(course_list);

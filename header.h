@@ -48,6 +48,8 @@ Snode* reads_from_students_file(Snode* student_list);
 Snode* writes_to_students_file(Snode* student_list);
 Cnode* reads_from_courses_file(Cnode* course_list);
 Cnode* writes_to_courses_file(Cnode* course_list);
+Enode* writes_to_exams_file(Enode* exam_list);
+Enode* reads_from_exams_file(Enode* exam_list);
 
 /* Functions in Students.c file */
 Snode* new_student(Snode* student_list);
