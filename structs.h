@@ -69,7 +69,6 @@ typedef struct course_node
 /***********************************/
 typedef struct exam_node
 {
-    int id; /* Although not requested, it will be useful to delete an exam */
     Course course; /* The exam has a course associated */
     Date start_date; /* The exam has a start date associated */
     Date end_date; /* end_date = start_date + the duration of the exam */
@@ -92,4 +91,3 @@ typedef struct exam_node
 Snode *student_list;
 Cnode *course_list;
 Enode *exam_list;
-int id;

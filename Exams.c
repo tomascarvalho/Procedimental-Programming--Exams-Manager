@@ -65,7 +65,7 @@ Enode* new_exam(Enode* exam_list)
     {
         /*DEBUG*/
         #ifdef DEBUG
-        printf("DEBUG: Exam already exists!");
+        printf("DEBUG: Exam already exists!\n");
         #endif
         printf("O exame ja existe para esta disciplina e esta epoca!\n");
         return exam_list;
@@ -91,8 +91,6 @@ Enode* new_exam(Enode* exam_list)
 
 
     new_exam -> next = NULL;
-    id +=1;
-    new_exam-> id = id;
     crs.name = (char*) malloc (strlen(aux_course->course.name) * sizeof(char));
     strcpy(crs.name, aux_course->course.name);
     crs.regent = (char*) malloc (strlen(aux_course->course.regent) * sizeof(char));
@@ -215,11 +213,11 @@ void list_exams()
     while (aux != NULL)
     {
         if (aux->period == NORMAL)
-            printf("\n%d\t%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->id, aux->course.name, aux->course.regent, "NORMAL", aux->start_date.day, aux->start_date.month, aux->start_date.year, aux->start_date.hour, aux->start_date.minute, aux->end_date.day, aux->end_date.month, aux->end_date.year, aux->end_date.hour, aux->end_date.minute, aux->n_students);
+            printf("\n%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->course.name, aux->course.regent, "NORMAL", aux->start_date.day, aux->start_date.month, aux->start_date.year, aux->start_date.hour, aux->start_date.minute, aux->end_date.day, aux->end_date.month, aux->end_date.year, aux->end_date.hour, aux->end_date.minute, aux->n_students);
         else if (aux->period == SECOND)
-            printf("\n%d\t%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->id, aux->course.name, aux->course.regent, "RECURSO", aux->start_date.day, aux->start_date.month, aux->start_date.year, aux->start_date.hour, aux->start_date.minute, aux->end_date.day, aux->end_date.month, aux->end_date.year, aux->end_date.hour, aux->end_date.minute, aux->n_students);
+            printf("\n%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->course.name, aux->course.regent, "RECURSO", aux->start_date.day, aux->start_date.month, aux->start_date.year, aux->start_date.hour, aux->start_date.minute, aux->end_date.day, aux->end_date.month, aux->end_date.year, aux->end_date.hour, aux->end_date.minute, aux->n_students);
         else if (aux->period == SPECIAL)
-            printf("\n%d\t%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->id, aux->course.name, aux->course.regent, "ESPECIAL", aux->start_date.day, aux->start_date.month, aux->start_date.year, aux->start_date.hour, aux->start_date.minute, aux->end_date.day, aux->end_date.month, aux->end_date.year, aux->end_date.hour, aux->end_date.minute, aux->n_students);
+            printf("\n%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->course.name, aux->course.regent, "ESPECIAL", aux->start_date.day, aux->start_date.month, aux->start_date.year, aux->start_date.hour, aux->start_date.minute, aux->end_date.day, aux->end_date.month, aux->end_date.year, aux->end_date.hour, aux->end_date.minute, aux->n_students);
         for (i = 0; i < aux->n_rooms; i++)
             if (i == 0)
                 printf("\t\t\t\t\t\t\t\t%s\n", aux->rooms[i]);
@@ -318,61 +316,76 @@ Enode* exam_exists(char cname[], int per)
 // }
 //
 //
-// /*********************************************************************/
-// /*                     delete_course function                        */
-// /* Function to delete a course from the list                         */
-// /* Receives a pointer to the beginning of the course list            */
-// /* Returns a pointer to the beginning of the course list             */
-// /*********************************************************************/
-// Cnode* delete_course(Cnode* course_list)
-// {
-//     Cnode* to_remove = NULL;
-//     Cnode* after = NULL;
-//     Cnode* aux = course_list;
-//     char aux_name[MAX_CHAR];
-//     /*DEBUG*/
-//     #ifdef DEBUG
-//     printf("DEBUG: delete_course function called\n");
-//     #endif
-//     /* "eats" the \n from the previous input */
-//     getchar();
-//     printf("Nome da disciplina a apagar: ");
-//     fgets(aux_name, MAX_CHAR, stdin);
-//     removes_newLine(aux_name);
-//     to_remove = course_exists(aux_name);
-//     if (to_remove == NULL)
-//     {
-//         printf("A disciplina com esse nome nao existe\n");
-//         return course_list;
-//     }
-//     while (aux -> next != to_remove)
-//         aux = aux -> next;
-//     after = to_remove -> next;
-//     free(to_remove);
-//     aux -> next = after;
-//     printf("Disciplina removida com sucesso\n");
-//     return course_list;
-// }
-//
-// /*********************************************************************/
-// /*                     destroy_list functions                        */
-// /* Function to destroy a linked list by free(ing) its nodes          */
-// /* Receives a pointer to the beginning of the course list            */
-// /* Returns void                                                      */
-// /*********************************************************************/
-// void destroy_course_list(Cnode* course_list)
-// {
-//     /*DEBUG*/
-//     #ifdef DEBUG
-//     printf("DEBUG: Destroying course's list\n");
-//     #endif
-//     Cnode* aux = course_list->next;
-//     Cnode* temp = NULL;
-//     while (aux != NULL)
-//     {
-//         temp = aux -> next;
-//         free(aux);
-//         aux = temp;
-//     }
-//     free(course_list);
-// }
+/*********************************************************************/
+/*                     delete_exam function                          */
+/* Function to delete a exam from the list                           */
+/* Receives a pointer to the beginning of the exam list              */
+/* Returns a pointer to the beginning of the exam list               */
+/*********************************************************************/
+Enode* delete_exam(Enode* exam_list)
+{
+    Enode* to_remove = NULL;
+    Enode* after = NULL;
+    Enode* aux = exam_list;
+    char aux_name[MAX_CHAR];
+    char option;
+    int aux_period;
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("DEBUG: delete_exam function called\n");
+    #endif
+    /* "eats" the \n from the previous input */
+    getchar();
+    printf("Nome da disciplina do exame a apagar: ");
+    fgets(aux_name, MAX_CHAR, stdin);
+    removes_newLine(aux_name);
+    /*Do... */
+    do
+    {
+        /* asks for course period */
+        printf("Epoca do Exame a Remover:\n1- Normal\n2- Recurso\n3- Especial\n");
+        scanf(" %c", &option);
+        getchar();
+
+    } while (option < '1' || option > '3'); /* While option is not in valid range */
+    aux_period = (int)(option - '0');
+    to_remove = exam_exists(aux_name, aux_period);
+
+    if (to_remove == NULL)
+    {
+        printf("Nao existe um exame que obedeca a este criterio.\n");
+        return exam_list;
+    }
+    while (aux -> next != to_remove)
+        aux = aux -> next;
+    after = to_remove -> next;
+    free(to_remove);
+    aux -> next = after;
+    printf("Exame removido com sucesso\n");
+    return exam_list;
+}
+
+/*********************************************************************/
+/*                     destroy_list functions                        */
+/* Function to destroy a linked list by free(ing) its nodes          */
+/* Receives a pointer to the beginning of the exam list              */
+/* Returns void                                                      */
+/*********************************************************************/
+void destroy_exam_list(Enode* exam_list)
+{
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("DEBUG: Destroying exam's list\n");
+    #endif
+    Enode* aux = exam_list->next;
+    Enode* temp = NULL;
+    while (aux != NULL)
+    {
+        temp = aux -> next;
+        /* Do I need to free the student list here ? */
+        free(aux);
+
+        aux = temp;
+    }
+    free(course_list);
+}

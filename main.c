@@ -8,7 +8,6 @@
 int main(int argc, char const *argv[]) {
 
     /* Pointer to the begining of our students list. Initialized with garbage on the first element*/
-    id = 0;
     student_list = (Snode*) malloc (sizeof(Snode));
     if (student_list == NULL)
     {
@@ -138,6 +137,7 @@ int main(int argc, char const *argv[]) {
                     break;
 
                 case DELETE_EXAM:
+                    exam_list = delete_exam(exam_list);
                     break;
 
                 case LIST_EXAMS:
@@ -162,6 +162,7 @@ int main(int argc, char const *argv[]) {
     /* Destroy linked lists from memory */
     destroy_student_list(student_list);
     destroy_course_list(course_list);
+    destroy_exam_list(exam_list);
 
     return 0;
 }
