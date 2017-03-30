@@ -235,6 +235,11 @@ Cnode* delete_course(Cnode* course_list)
         printf("A disciplina com esse nome nao existe\n");
         return course_list;
     }
+    else if ((exam_exists(to_remove->course.name, NORMAL) != NULL) || (exam_exists(to_remove->course.name, SECOND) != NULL) || (exam_exists(to_remove->course.name, SPECIAL) != NULL))
+    {
+        printf("Ha pelo menos um exame marcado a essa desciplina. Por favor apague o exame antes de tentar apagar a disciplina\n");
+        return course_list;
+    }
     while (aux -> next != to_remove)
         aux = aux -> next;
     after = to_remove -> next;
