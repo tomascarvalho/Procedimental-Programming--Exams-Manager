@@ -119,7 +119,7 @@ Enode* new_exam(Enode* exam_list)
     {
         printf("%da sala: ", i+1);
         fgets(option_rooms, MAX_CHAR, stdin);
-        if (check_room(option_rooms, new_exam->start_date))
+        if (check_room(new_exam, option_rooms, new_exam->start_date))
         {
             if ((new_exam -> rooms[i] = (char*) malloc (sizeof(char) * strlen(option_rooms))) == NULL)
             {
@@ -148,8 +148,12 @@ Enode* new_exam(Enode* exam_list)
 
 }
 
-int check_room(char* room, Date date)
+int check_room(Enode* exam, char* room, Date date)
 {
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("DEBUG: Function check_room called\n");
+    #endif
     Enode* aux = exam_list -> next;
     int i;
     if (aux == NULL)
@@ -157,7 +161,7 @@ int check_room(char* room, Date date)
 
     while (aux != NULL)
     {
-        if ((aux->start_date.year == date.year) && (aux->start_date.month == date.month) && (aux->start_date.day == date.day))
+        if ((exam != aux) && (aux->start_date.year == date.year) && (aux->start_date.month == date.month) && (aux->start_date.day == date.day))
         {
             if ((aux->start_date.hour <= date.hour) && (aux->end_date.hour > date.hour))
             {
@@ -183,6 +187,7 @@ int check_room(char* room, Date date)
                 }
             }
         }
+        aux = aux->next;
 
     }
     return 1;
@@ -190,8 +195,8 @@ int check_room(char* room, Date date)
 
 
 /****************************************************************/
-/*                   list_courses function                      */
-/* Function to list the existing courses in the courses list    */
+/*                   list_exams function                        */
+/* Function to list the existing examss in the courses list     */
 /* Receives no params                                           */
 /* Returns void                                                 */
 /****************************************************************/
@@ -208,7 +213,7 @@ void list_exams()
         return;
     }
     printf("Lista de Exames\n");
-    printf("\nID\tDisciplina\tRegente\tEpoca\tData Inicio\tData Fim\tNum Inscritos\tSalas\n");
+    printf("\nDisciplina\t\tRegente\tEpoca\tData Inicio\tData Fim\tNum Inscritos\tSalas\n");
 
     while (aux != NULL)
     {
@@ -239,6 +244,7 @@ Enode* exam_exists(char cname[], int per)
         if (strcmp(aux->course.name, cname) == 0)
             if (aux-> period == per)
                 return aux;
+        aux = aux->next;
     }
     return NULL;
 }
@@ -250,72 +256,107 @@ Enode* exam_exists(char cname[], int per)
 /* Receives no params                                                */
 /* Returns void                                                      */
 /*********************************************************************/
-// void update_course()
-// {
-//     Cnode* to_update = NULL;
-//     char aux_name[MAX_CHAR], aux_regent[MAX_CHAR];
-//     int is_unique = 1;
-//
-//     /*DEBUG*/
-//     #ifdef DEBUG
-//     printf("DEBUG: update_course function called\n");
-//     #endif
-//     /* "eats" the \n from the previous input */
-//     getchar();
-//     printf("\nNome da disciplina para actualizar: ");
-//     fgets(aux_name, MAX_CHAR, stdin);
-//     /* Removes the \n from the aux_name (fgets function) */
-//     removes_newLine(aux_name);
-//
-//     /* Checks if course exists */
-//     to_update = course_exists(aux_name);
-//     if (to_update == NULL)
-//     {
-//         /* If the course to update does not exist we return */
-//         printf("A disciplina com esse nome nao existe\n");
-//         return;
-//     }
-//
-//     /* If it exists, we update it */
-//     printf("Novos dados da disciplina\n");
-//     /* Do... */
-//     do
-//     {
-//         /* Asks for new course name */
-//         printf("Nome: ");
-//         fgets(aux_name, MAX_CHAR, stdin);
-//         removes_newLine(aux_name);
-//         is_unique = 1;
-//
-//         if (course_exists(aux_name) != NULL)
-//         {
-//             if (course_exists(aux_name) != to_update)
-//             {
-//                 /*DEBUG*/
-//                 #ifdef DEBUG
-//                 printf("DEBUG: The course name exists\n");
-//                 #endif
-//                 printf("Ja existe uma disciplina com esse nome\n");
-//                 is_unique = 0;
-//
-//             }
-//         }
-//     } while (!is_unique); /* While course is not unique */
-//
-//     printf("Regente: ");
-//     fgets(aux_regent, MAX_CHAR, stdin);
-//     removes_newLine(aux_regent);
-//
-//     to_update -> course.name = (char*) malloc (sizeof(char)*strlen(aux_name));
-//     strcpy(to_update->course.name, aux_name);
-//     to_update -> course.regent = (char*) malloc (sizeof(char)*strlen(aux_regent));
-//     strcpy(to_update->course.regent, aux_regent);
-//
-//     printf("Actualizado com sucesso\n");
-//
-// }
-//
-//
+void update_exam()
+{
+    Enode* to_update = NULL;
+    Date aux_date;
+    char aux_name[MAX_CHAR], aux_str_period[MAX_CHAR], option_rooms[MAX_CHAR];
+    int aux_period = 0, n_rooms = 0, i = 0;
+    char option;
+
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("DEBUG: update_exam function called\n");
+    #endif
+    /* "eats" the \n from the previous input */
+    getchar();
+    printf("\nDisciplina do exame a actualizar: ");
+    fgets(aux_name, MAX_CHAR, stdin);
+    /* Removes the \n from the aux_name (fgets function) */
+    removes_newLine(aux_name);
+    printf("\nEpoca do exame a actualizar: ");
+    fgets(aux_str_period, MAX_CHAR, stdin);
+
+    /* Checks if course exists */
+    to_update = exam_exists(aux_name, atoi(aux_str_period));
+    if (to_update == NULL)
+    {
+        /* If the course to update does not exist we return */
+        printf("Nao existe um exame a essa disciplina nessa epoca\n");
+        return;
+    }
+
+    printf("Actualizar exame\n");
+
+    /*Do... */
+    do
+    {
+        /* asks for course period */
+        printf("Epoca:\n1- Normal\n2- Recurso\n3- Especial\n");
+        scanf("%c", &option);
+        getchar();
+    } while (option < '1' || option > '3'); /* While option is not in valid range */
+    aux_period = (int)(option - '0');
+
+
+    if (exam_exists(aux_name, aux_period) != NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: Exam already exists!\n");
+        #endif
+        printf("O exame ja existe para esta disciplina e esta epoca!\n");
+        return;
+    }
+
+    printf("Data do exame\n");
+    aux_date = new_date();
+
+    to_update -> period = aux_period;
+
+    to_update -> start_date = aux_date;
+    aux_date = get_duration(aux_date);
+    to_update -> end_date = aux_date;
+
+
+    /* Do... */
+    do {
+        printf("Numero de salas a reservar para o exame: "); /* Asks for the number of rooms */
+        fgets(option_rooms, MAX_CHAR, stdin);
+        n_rooms = atoi(option_rooms);
+        if (n_rooms == 0)
+            printf("Insira um numero valido!\n");
+    } while (n_rooms == 0); /* While the number is not valid */
+
+    to_update -> n_rooms = n_rooms;
+
+    memset(to_update->rooms, '\0', MAX_CHAR); /* Cleans the rooms matrix... we dont want garbage date in it */
+    while (i < n_rooms)
+    {
+        printf("%da sala: ", i+1);
+        fgets(option_rooms, MAX_CHAR, stdin);
+        if (check_room(to_update, option_rooms, to_update->start_date))
+        {
+            if ((to_update -> rooms[i] = (char*) malloc (sizeof(char) * strlen(option_rooms))) == NULL)
+            {
+                printf("Erro: Sem memoria!\n");
+                /*DEBUG*/
+                #ifdef DEBUG
+                printf("DEBUG: NO MEMORY AVAILABLE! ERROR\n");
+                #endif
+                return;
+            }
+            strcpy(to_update->rooms[i], option_rooms);
+            i++;
+        }
+        else
+            printf("Sala ja reservada para um exame. Por favor, selecionar outra sala\n");
+    }
+
+
+}
+
+
 /*********************************************************************/
 /*                     delete_exam function                          */
 /* Function to delete a exam from the list                           */
@@ -387,5 +428,5 @@ void destroy_exam_list(Enode* exam_list)
 
         aux = temp;
     }
-    free(course_list);
+    free(exam_list);
 }
