@@ -12,6 +12,23 @@ void removes_newLine(char *str)
 }
 
 
+
+/*************************************************************/
+/*                 insert_student function                   */
+/* Function to create insert a student to a student list     */
+/* Receives the pointer to the first element of student list */
+/* and the new node to insert                                */
+/* Returns a pointer to the first element of student list    */
+/*************************************************************/
+Snode* insert_student(Snode* student_list, Snode* new_student)
+{
+    Snode* aux = student_list;
+    while (aux->next !=  NULL)
+        aux = aux->next;
+    aux->next = new_student;
+    return student_list;
+}
+
 /*************************************************************/
 /*                  new_student function                     */
 /* Function to create a new student and add it to the list   */
@@ -20,7 +37,6 @@ void removes_newLine(char *str)
 /*************************************************************/
 Snode* new_student(Snode* student_list)
 {
-    Snode* aux = student_list;
     Snode* new_student = NULL;
     Student stdnt;
     char aux_id[MAX_CHAR], aux_degree[MAX_CHAR];
@@ -54,7 +70,7 @@ Snode* new_student(Snode* student_list)
     aux_regime = (int)(option - '0');
 
     /* If the student number exists, then we can't add it to the list */
-    if ((student_exists(aux_id)) != NULL)
+    if ((student_exists(student_list, aux_id)) != NULL)
     {
         #ifdef DEBUG
         printf("DEBUG: Student exists didnt return NULL\n");
@@ -87,10 +103,7 @@ Snode* new_student(Snode* student_list)
 
     new_student -> student = stdnt;
     new_student -> next = NULL;
-
-    while (aux -> next != NULL)
-        aux = aux -> next;
-    aux -> next = new_student;
+    student_list = insert_student(student_list, new_student);
 
     return student_list;
 
@@ -168,7 +181,7 @@ void count_students()
 /* Receives the id of the student we want to find                             */
 /* Returns a pointer to the student found or null if the student doesnt exist */
 /******************************************************************************/
-Snode* student_exists(char s_id[])
+Snode* student_exists(Snode* student_list, char s_id[])
 {
 
     #ifdef DEBUG
@@ -229,7 +242,7 @@ void update_student()
     removes_newLine(aux_id);
 
     /* Checks if student exists */
-    to_update = student_exists(aux_id);
+    to_update = student_exists(student_list, aux_id);
     if (to_update == NULL)
     {
         /* If the student to update does not exist we return */
@@ -248,9 +261,9 @@ void update_student()
         removes_newLine(aux_id);
         is_unique = 1;
 
-        if (student_exists(aux_id) != NULL)
+        if (student_exists(student_list, aux_id) != NULL)
         {
-            if (student_exists(aux_id) != to_update)
+            if (student_exists(student_list, aux_id) != to_update)
             {
                 /*DEBUG*/
                 #ifdef DEBUG
@@ -310,7 +323,7 @@ Snode* delete_student(Snode* student_list)
     printf("Numero do estudante a apagar: ");
     fgets(aux_id, MAX_CHAR, stdin);
     removes_newLine(aux_id);
-    to_remove = student_exists(aux_id);
+    to_remove = student_exists(student_list, aux_id);
     if (to_remove == NULL)
     {
         printf("O estudante com esse ID nao existe\n");
