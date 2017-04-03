@@ -97,7 +97,8 @@ Enode* new_exam(Enode* exam_list)
     strcpy(crs.regent, aux_course->course.regent);
     new_exam-> course = crs;
     new_exam-> period = aux_period;
-
+    new_exam-> students = (Snode*) malloc (sizeof(Snode));
+    new_exam-> students-> next = NULL;
     new_exam-> n_students = 0;
     new_exam-> start_date = aux_date;
     aux_date = get_duration(aux_date);
@@ -352,6 +353,85 @@ void update_exam()
         else
             printf("Sala ja reservada para um exame. Por favor, selecionar outra sala\n");
     }
+
+
+}
+
+
+/*********************************************************************/
+/*                   register_student function                       */
+/* Function to add a student to an exam student list                 */
+/* Receives no params                                                */
+/* Returns void                                                      */
+/*********************************************************************/
+void register_student(Enode* exam)
+{
+    char aux_name[MAX_CHAR];
+    Snode* student_aux = NULL;
+    Snode* new_student = NULL;
+
+    printf("Numero do estudante a inscrever no exame\n");
+    fgets(aux_name, MAX_CHAR, stdin); /* gets the student id from the user */
+    removes_newLine(aux_name); /* removes the new line from the fgets function */
+
+    if ((student_aux = student_exists(student_list, aux_name)) != NULL)
+    {
+        if ((student_exists(exam->students, aux_name) == NULL))
+        {
+            if (exam->period != SPECIAL)
+            {
+                exam->n_students += 1;
+                new_student = (Snode*) malloc (sizeof(Snode));
+                new_student-> student = student_aux -> student;
+                new_student -> next = NULL;
+                exam->students = insert_student(exam->students, new_student);
+            }
+            else
+            {
+                if (student_aux ->student.regime == NORMAL_STUDENT || student_aux->student.regime == ERASMUS)
+                {
+                    exam->n_students += 1;
+                    new_student = (Snode*) malloc (sizeof(Snode));
+                    new_student-> student = student_aux -> student;
+                    new_student -> next = NULL;
+                    exam->students = insert_student(exam->students, new_student);
+                }
+                else if (student_aux -> student.year == FINALIST)
+                {
+                    exam->n_students += 1;
+                    new_student = (Snode*) malloc (sizeof(Snode));
+                    new_student-> student = student_aux -> student;
+                    new_student -> next = NULL;
+                    exam->students = insert_student(exam->students, new_student);
+                }
+                else
+                {
+                    printf("O aluno nao tem estatuto para se poder realizar um exame de epoca especial\n");
+                    return;
+                }
+
+            }
+        }
+        else
+        {
+            /*DEBUG*/
+            #ifdef DEBUG
+            printf("DEBUG: student_exists returned !null or for exam->students\n");
+            #endif
+            printf("O estudante ja se encontra registado no exame\n");
+            return;
+        }
+    }
+    else
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: student_exists returned null or for student_list\n");
+        #endif
+        printf("Nao existe um estudante com esse numero de estudante\n");
+        return;
+    }
+    printf("Aluno inscrito com sucesso\n");
 
 
 }

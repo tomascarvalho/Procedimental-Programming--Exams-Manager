@@ -54,7 +54,8 @@ Enode* reads_from_exams_file(Enode* exam_list);
 /* Functions in Students.c file */
 Snode* new_student(Snode* student_list);
 Snode* delete_student(Snode* student_list);
-Snode* student_exists(char s_id[]);
+Snode* student_exists(Snode*, char s_id[]);
+Snode* insert_student(Snode* student_list, Snode* new_student);
 void removes_newLine(char *str);
 void destroy_student_list(Snode* student_list);
 void update_student();
@@ -75,6 +76,7 @@ Enode* new_exam(Enode* exam_list);
 Enode* exam_exists(char cname[], int time);
 Enode* delete_exam(Enode* exam_list);
 int check_room(Enode* exam, char* room, Date date);
+void register_student(Enode* exam);
 void destroy_exam_list(Enode* exam_node);
 void list_exams();
 void update_exam();
