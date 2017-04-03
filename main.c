@@ -100,6 +100,8 @@ int main(int argc, char const *argv[]) {
 
                 case BACK:
                     break;
+                default:
+                    printf("Opcao invalida\n");
             }
         }
         else if (menu_option == COURSES)
@@ -124,6 +126,8 @@ int main(int argc, char const *argv[]) {
 
                 case BACK:
                     break;
+                default:
+                    printf("Opcao invalida\n");
             }
         }
         else if (menu_option == EXAMS)
@@ -135,6 +139,7 @@ int main(int argc, char const *argv[]) {
                     break;
 
                 case UPDATE_EXAM:
+                    update_exam();
                     break;
 
                 case DELETE_EXAM:
@@ -147,6 +152,8 @@ int main(int argc, char const *argv[]) {
 
                 case BACK:
                     break;
+                default:
+                    printf("Opcao invalida\n");
             }
         }
 

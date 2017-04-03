@@ -74,6 +74,7 @@ void update_course();
 Enode* new_exam(Enode* exam_list);
 Enode* exam_exists(char cname[], int time);
 Enode* delete_exam(Enode* exam_list);
-int check_room(char* room, Date date);
+int check_room(Enode* exam, char* room, Date date);
 void destroy_exam_list(Enode* exam_node);
 void list_exams();
+void update_exam();

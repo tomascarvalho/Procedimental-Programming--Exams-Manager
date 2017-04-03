@@ -48,8 +48,8 @@ typedef struct date
 /***************************************/
 typedef struct student_node
 {
-    Student student;
-    struct student_node *next;
+    Student student; /* Student data type */
+    struct student_node *next; /* Pointer to next student node */
 } Snode;
 
 /***************************************/
@@ -57,8 +57,8 @@ typedef struct student_node
 /***************************************/
 typedef struct course_node
 {
-    Course course;
-    struct course_node *next;
+    Course course; /* Course data type */
+    struct course_node *next; /* Pointer to next course node */
 } Cnode;
 
 
@@ -69,7 +69,7 @@ typedef struct course_node
 /***********************************/
 typedef struct exam_node
 {
-    Course course; /* The exam has a course associated */
+    Course course; /* The exam points to its course */
     Date start_date; /* The exam has a start date associated */
     Date end_date; /* end_date = start_date + the duration of the exam */
     char* rooms[MAX_CHAR]; /* The exam has one or more rooms associated */

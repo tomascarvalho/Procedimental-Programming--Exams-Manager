@@ -317,7 +317,8 @@ Enode* writes_to_exams_file(Enode* exam_list)
         for (i = 0; i < aux->n_rooms; i++)
         {
             fputs(aux-> rooms[i], fp);
-            fputs("\n", fp);
+            if (i < aux-> n_rooms -1) /* We dont want to put a \n in the last */
+                fputs("\n", fp);
         }
 
         fprintf(fp, "%d\n", aux-> n_students);
