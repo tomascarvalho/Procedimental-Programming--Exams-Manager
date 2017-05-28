@@ -3,6 +3,27 @@
 /* File with functions to manipulate the list of courses */
 
 /*************************************************************/
+/*               create_course_list function                 */
+/* Function to create a new empty list of courses            */
+/* Receives no arguments                                     */
+/* Returns a pointer to the first element of the list        */
+/*************************************************************/
+Cnode* create_course_list()
+{
+    Cnode* list = (Cnode*) malloc (sizeof(Cnode));
+    if (list == NULL)
+    {
+        printf("Erro: Sem memoria!\n");
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: NO MEMORY AVAILABLE! ERROR\n");
+        #endif
+        return NULL;
+    }
+    list -> next = NULL;
+    return list;
+}
+/*************************************************************/
 /*                  new_course function                      */
 /* Function to create a new course and add it to the list    */
 /* Receives the pointer to the first element of courses list */
@@ -10,14 +31,15 @@
 /*************************************************************/
 Cnode* new_course(Cnode* course_list)
 {
-    Cnode* aux = course_list;
-    Cnode* new_course = NULL;
-    Course crs;
+    Cnode* aux = NULL;
+    Cnode* before = NULL;
+    Cnode* after = NULL;
+
     char aux_name[MAX_CHAR], aux_regent[MAX_CHAR];
 
     /*DEBUG*/
     #ifdef DEBUG
-    printf("\nDEBUG: funcao new_course chamada \n");
+    printf("\nDEBUG: funcao new_course chamada\n");
     #endif
 
     getchar();
@@ -30,41 +52,37 @@ Cnode* new_course(Cnode* course_list)
     removes_newLine(aux_regent);
 
     /* If the student number exists, then we can't add it to the list */
-    if ((course_exists(aux_name)) != NULL)
+    if ((course_exists(aux_name, &before, course_list)) != NULL)
     {
         #ifdef DEBUG
         printf("DEBUG: Course exists didnt return NULL\n");
         #endif
         printf("Ja existe uma disciplina com este nome!\n");
-        return NULL;
+        return course_list;
+    }
+
+
+    if ((aux = create_course_list()) == NULL)
+        return course_list;
+
+    else if (before == NULL)
+    {
+        after = course_list;
+        course_list = aux;
+    }
+    else
+    {
+        after = before->next;
+        before->next = aux;
     }
 
     /* We create the new course */
-    crs.name = (char*) malloc (sizeof(char) * strlen(aux_name));
-    strcpy(crs.name, aux_name);
-    crs.regent = (char*) malloc (sizeof(char) * strlen(aux_regent));
-    strcpy(crs.regent, aux_regent);
+    aux->course.name = (char*) malloc (sizeof(char) * strlen(aux_name));
+    strcpy(aux->course.name, aux_name);
+    aux->course.regent = (char*) malloc (sizeof(char) * strlen(aux_regent));
+    strcpy(aux->course.regent, aux_regent);
 
-    /* We alocate memory for the new course */
-    new_course = (Cnode*) malloc (sizeof(Cnode));
-    /* Was memory alocated?*/
-    if (new_course == NULL)
-    {
-        printf("ERRO: Sem memoria!\n");
-        /*DEBUG*/
-        #ifdef DEBUG
-        printf("FATAL ERROR: FAILED TO ALOCATE MEMORY FOR new_course NODE AT NEW_COURSE FUNCTION\n");
-        #endif
-        return NULL;
-    }
-
-
-    new_course -> course = crs;
-    new_course -> next = NULL;
-
-    while (aux -> next!= NULL)
-        aux = aux -> next;
-    aux -> next = new_course;
+    aux -> next = after;
 
     return course_list;
 
@@ -78,9 +96,9 @@ Cnode* new_course(Cnode* course_list)
 /* Receives no params                                           */
 /* Returns void                                                 */
 /****************************************************************/
-void list_courses()
+void list_courses(Cnode* course_list)
 {
-    Cnode* aux = course_list-> next;
+    Cnode* aux = course_list;
 
     if (aux == NULL)
     {
@@ -107,14 +125,16 @@ void list_courses()
 /* Receives the name of the course we want to find                            */
 /* Returns a pointer to the course found or null if the student doesnt exist  */
 /******************************************************************************/
-Cnode* course_exists(char c_id[])
+Cnode* course_exists(char* c_id, Cnode** before, Cnode* list)
 {
 
     #ifdef DEBUG
     printf("DEBUG: course_exists function\n");
     #endif
-    Cnode* aux = course_list -> next;
+    Cnode* aux = list;
 
+    if (aux == NULL)
+        return NULL;
 
     while (aux != NULL)
     {
@@ -130,6 +150,9 @@ Cnode* course_exists(char c_id[])
             #endif
             return aux;
         }
+        else if (strcmp(aux->course.name, c_id) > 0)
+            return NULL;
+        *before = aux;
         aux = aux -> next;
     }
     return NULL;
@@ -142,9 +165,12 @@ Cnode* course_exists(char c_id[])
 /* Receives no params                                                */
 /* Returns void                                                      */
 /*********************************************************************/
-void update_course()
+Cnode* update_course(Cnode* course_list)
 {
     Cnode* to_update = NULL;
+    Cnode* aux = NULL;
+    Cnode* before = NULL;
+    Cnode* after = NULL;
     char aux_name[MAX_CHAR], aux_regent[MAX_CHAR];
     int is_unique = 1;
 
@@ -160,13 +186,15 @@ void update_course()
     removes_newLine(aux_name);
 
     /* Checks if course exists */
-    to_update = course_exists(aux_name);
+    to_update = course_exists(aux_name, &before, course_list);
     if (to_update == NULL)
     {
         /* If the course to update does not exist we return */
         printf("A disciplina com esse nome nao existe\n");
-        return;
+        return course_list;
     }
+
+    course_list = delete_course(aux_name, course_list);
 
     /* If it exists, we update it */
     printf("Novos dados da disciplina\n");
@@ -179,20 +207,20 @@ void update_course()
         removes_newLine(aux_name);
         is_unique = 1;
 
-        if (course_exists(aux_name) != NULL)
+        if ((aux = course_exists(aux_name, &before, course_list)) != NULL)
         {
-            if (course_exists(aux_name) != to_update)
-            {
-                /*DEBUG*/
-                #ifdef DEBUG
-                printf("DEBUG: The course name exists\n");
-                #endif
-                printf("Ja existe uma disciplina com esse nome\n");
-                is_unique = 0;
+            /*DEBUG*/
+            #ifdef DEBUG
+            printf("DEBUG: The course name exists\n");
+            #endif
+            printf("Ja existe uma disciplina com esse nome\n");
+            is_unique = 0;
 
-            }
         }
     } while (!is_unique); /* While course is not unique */
+
+    if ((to_update = create_course_list()) == NULL)
+        return course_list;
 
     printf("Regente: ");
     fgets(aux_regent, MAX_CHAR, stdin);
@@ -202,8 +230,22 @@ void update_course()
     strcpy(to_update->course.name, aux_name);
     to_update -> course.regent = (char*) malloc (sizeof(char)*strlen(aux_regent));
     strcpy(to_update->course.regent, aux_regent);
+    to_update->next = after;
+
+    if (before == NULL)
+    {
+        to_update->next = course_list;
+        course_list = to_update;
+    }
+    else
+    {
+
+        to_update->next = before->next;
+        before->next = to_update;
+    }
 
     printf("Actualizado com sucesso\n");
+    return course_list;
 
 }
 
@@ -214,37 +256,42 @@ void update_course()
 /* Receives a pointer to the beginning of the course list            */
 /* Returns a pointer to the beginning of the course list             */
 /*********************************************************************/
-Cnode* delete_course(Cnode* course_list)
+Cnode* delete_course(char* aux_name, Cnode* course_list)
 {
     Cnode* to_remove = NULL;
-    Cnode* after = NULL;
-    Cnode* aux = course_list;
-    char aux_name[MAX_CHAR];
+    Cnode* before = NULL;
+
     /*DEBUG*/
     #ifdef DEBUG
     printf("DEBUG: delete_course function called\n");
     #endif
-    /* "eats" the \n from the previous input */
-    getchar();
-    printf("Nome da disciplina a apagar: ");
-    fgets(aux_name, MAX_CHAR, stdin);
-    removes_newLine(aux_name);
-    to_remove = course_exists(aux_name);
+
+    to_remove = course_exists(aux_name, &before, course_list);
+
     if (to_remove == NULL)
     {
         printf("A disciplina com esse nome nao existe\n");
         return course_list;
     }
-    else if ((exam_exists(to_remove->course.name, NORMAL) != NULL) || (exam_exists(to_remove->course.name, SECOND) != NULL) || (exam_exists(to_remove->course.name, SPECIAL) != NULL))
+
+    // else if ((exam_exists(aux_name, NORMAL) != NULL) || (exam_exists(aux_name, SECOND) != NULL) || (exam_exists(aux_name, SPECIAL) != NULL))
+    // {
+    //     printf("Ha pelo menos um exame marcado a essa desciplina. Por favor apague o exame antes de tentar apagar a disciplina\n");
+    //     return course_list;
+    // }
+
+    if (before != NULL)
     {
-        printf("Ha pelo menos um exame marcado a essa desciplina. Por favor apague o exame antes de tentar apagar a disciplina\n");
-        return course_list;
+        before -> next = to_remove->next;
+        free(to_remove);
     }
-    while (aux -> next != to_remove)
-        aux = aux -> next;
-    after = to_remove -> next;
-    free(to_remove);
-    aux -> next = after;
+    else
+    {
+        course_list = to_remove->next;
+        free(to_remove);
+    }
+
+
     printf("Disciplina removida com sucesso\n");
     return course_list;
 }

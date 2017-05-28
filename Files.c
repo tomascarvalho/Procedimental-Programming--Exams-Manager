@@ -8,14 +8,16 @@
 /* Receives the pointer to the first element of student list */
 /* Returns a pointer to the first element of student list    */
 /*************************************************************/
-Snode* reads_from_students_file(Snode* student_list)
+Snode* reads_from_students_file()
 {
 
     FILE *fp;   /* pointer to file data type */
     char buffer[MAX_CHAR];  /* buffer to get data from file */
-    Snode* aux = student_list;
+    Snode* student_list = NULL;
+    Snode* aux = NULL;
     Snode* new_student = NULL;
-    Student stdnt;
+    // Snode* new_student = NULL;
+    // Student stdnt;
 
     /*DEBUG*/
     #ifdef DEBUG
@@ -35,33 +37,53 @@ Snode* reads_from_students_file(Snode* student_list)
         return student_list;
     }
 
+
     while (fgets(buffer, MAX_CHAR, fp) != NULL)
     {
         #ifdef DEBUG
-        printf("DEBUG: Reads something from file...\n");
+        printf("DEBUG: Reads something from student file...\n");
         #endif
 
-        new_student = (Snode*) malloc (sizeof(Snode)); /* Alocates memory for new node */
+        if ((new_student = create_student_list(new_student)) == NULL)  /* Alocates memory for new node */
+            return NULL;
 
         removes_newLine(buffer); /* Removes new line from fgets */
-        stdnt.id = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to student.id */
-        strcpy(stdnt.id, buffer); /* Copies buffer content over to student.degree */
+        if ((new_student->student.id = (char*) malloc (sizeof(char) * strlen(buffer))) == NULL) /* Alocates memory to student.id */
+        {
+            printf("Memory Error!\n");
+            return NULL;
+        }
+        strcpy(new_student->student.id, buffer); /* Copies buffer content over to student.degree */
 
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
         removes_newLine(buffer); /* removes the new line from that line */
-        stdnt.degree = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to student.degree */
-        strcpy(stdnt.degree, buffer); /* Copies buffer content over to student.degree */
+        if ((new_student->student.degree = (char*) malloc (sizeof(char) * strlen(buffer))) == NULL) /* Alocates memory to student.degree */
+        {
+            printf("Memory Error!\n");
+            return NULL;
+        }
+        strcpy(new_student->student.degree, buffer); /* Copies buffer content over to student.degree */
 
 
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
-        stdnt.year = atoi(buffer); /* Copites int to student.year with atoi function */
+        new_student->student.year = atoi(buffer); /* Copies int to student.year with atoi function */
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
-        stdnt.regime = atoi(buffer); /* Copites int to student.regime with atoi function */
+        new_student->student.regime = atoi(buffer); /* Copies int to student.regime with atoi function */
+        new_student -> next = NULL;
 
-        new_student -> student = stdnt;
-        new_student -> next = NULL; /* Sets ->next to NULL */
-        aux -> next = new_student; /* Adds new_student to student_list */
-        aux = new_student;
+        if (aux == NULL)
+        {
+            if ((student_list = create_student_list(student_list)) == NULL)  /* Alocates memory for new node */
+                return NULL;
+            aux = student_list;
+            aux = new_student;
+            student_list = aux;
+        }
+        else
+        {
+            aux->next = new_student;
+            aux = aux -> next;
+        }
     }
 
     fclose(fp); /* Don't forget to close the file */
@@ -78,7 +100,7 @@ Snode* writes_to_students_file(Snode* student_list)
 {
 
     FILE *fp;   /* pointer to file data type */
-    Snode* aux = student_list -> next;
+    Snode* aux = student_list;
     char buffer[MAX_CHAR];
     /*DEBUG*/
     #ifdef DEBUG
@@ -112,16 +134,25 @@ Snode* writes_to_students_file(Snode* student_list)
     /* Iterate through student list nodes */
     while (aux != NULL)
     {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: Writes something to file...\n");
+        #endif
+
         fputs(aux -> student.id, fp); /* save student.id into file */
         fputs("\n", fp);
+
         fputs(aux -> student.degree, fp); /* save student.degree into file */
         fputs("\n", fp);
+
         snprintf(buffer, MAX_CHAR, "%d", aux -> student.year);
         fputs(buffer, fp); /* save student.year into file */
         fputs("\n", fp);
+
         snprintf(buffer, MAX_CHAR, "%d", aux -> student.regime);
         fputs(buffer, fp); /* save student.regime into file */
         fputs("\n", fp);
+
         aux = aux -> next;
     }
     /* Dont forget to close the file */
@@ -135,14 +166,15 @@ Snode* writes_to_students_file(Snode* student_list)
 /* Receives the pointer to the first element of courses list */
 /* Returns a pointer to the first element of courses list    */
 /*************************************************************/
-Cnode* reads_from_courses_file(Cnode* course_list)
+Cnode* reads_from_courses_file()
 {
 
     FILE *fp;   /* pointer to file data type */
     char buffer[MAX_CHAR];  /* buffer to get data from file */
-    Cnode* aux = course_list;
+    Cnode* course_list = NULL;
+    Cnode* aux = NULL;
     Cnode* new_course = NULL;
-    Course crs;
+    course_list = NULL;
 
     /*DEBUG*/
     #ifdef DEBUG
@@ -168,21 +200,32 @@ Cnode* reads_from_courses_file(Cnode* course_list)
         printf("DEBUG: Reads something from file...\n");
         #endif
 
-        new_course = (Cnode*) malloc (sizeof(Cnode)); /* Alocates memory for new node */
-
+        if ((new_course = create_course_list(new_course)) == NULL) /* Alocates memory for new node */
+            return NULL;
         removes_newLine(buffer); /* Removes new line from fgets */
-        crs.name = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to course.name */
-        strcpy(crs.name, buffer); /* Copies buffer content over to student.degree */
+        new_course -> course.name = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to course.name */
+        strcpy(new_course -> course.name, buffer); /* Copies buffer content over to student.degree */
 
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
         removes_newLine(buffer); /* removes the new line from that line */
-        crs.regent = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to course.regent */
-        strcpy(crs.regent, buffer); /* Copies buffer content over to student.degree */
+        new_course -> course.regent = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to course.regent */
+        strcpy(new_course -> course.regent, buffer); /* Copies buffer content over to student.degree */
 
-        new_course -> course = crs;
         new_course -> next = NULL; /* Sets ->next to NULL */
-        aux -> next = new_course; /* Adds new_course to course_list */
-        aux = new_course;
+
+        if (aux == NULL)
+        {
+            if ((course_list = create_course_list()) == NULL)  /* Alocates memory for new node */
+                return NULL;
+
+            aux = new_course;
+            course_list = aux;
+        }
+        else
+        {
+            aux->next = new_course;
+            aux = aux -> next;
+        }
     }
 
     fclose(fp); /* Don't forget to close the file */
@@ -200,7 +243,7 @@ Cnode* writes_to_courses_file(Cnode* course_list)
 {
 
     FILE *fp;   /* pointer to file data type */
-    Cnode* aux = course_list -> next;
+    Cnode* aux = course_list;
     /*DEBUG*/
     #ifdef DEBUG
     printf("\nDEBUG: writes_to_courses_file function called\n");
@@ -259,7 +302,9 @@ Enode* writes_to_exams_file(Enode* exam_list)
 {
 
     FILE *fp;   /* pointer to file data type */
-    Enode* aux = exam_list -> next;
+    Enode* aux = exam_list;
+    Spointer* students_aux = NULL;
+    Snode* student_temp = NULL;
     int i = 0;
     /*DEBUG*/
     #ifdef DEBUG
@@ -297,31 +342,41 @@ Enode* writes_to_exams_file(Enode* exam_list)
         #ifdef DEBUG
         printf("DEBUG: Writes something to file...\n");
         #endif
-        fputs(aux -> course.name, fp); /* save course.name into file */
+        fputs(aux -> exam.course.name, fp); /* save course.name into file */
         fputs("\n", fp);
-        fputs(aux -> course.regent, fp); /* save course.regent into file */
+        fputs(aux -> exam.course.regent, fp); /* save course.regent into file */
         fputs("\n", fp);
-        fprintf(fp, "%d\n", aux-> period);
-        fprintf(fp, "%d\n", aux-> start_date.day);
-        fprintf(fp, "%d\n", aux-> start_date.month);
-        fprintf(fp, "%d\n", aux-> start_date.year);
-        fprintf(fp, "%d\n", aux-> start_date.hour);
-        fprintf(fp, "%d\n", aux-> start_date.minute);
-        fprintf(fp, "%d\n", aux-> end_date.day);
-        fprintf(fp, "%d\n", aux-> end_date.month);
-        fprintf(fp, "%d\n", aux-> end_date.year);
-        fprintf(fp, "%d\n", aux-> end_date.hour);
-        fprintf(fp, "%d\n", aux-> end_date.minute);
-        fprintf(fp, "%d\n", aux-> n_rooms);
+        fprintf(fp, "%d\n", aux-> exam.period);
+        fprintf(fp, "%d\n", aux-> exam.start_date.day);
+        fprintf(fp, "%d\n", aux-> exam.start_date.month);
+        fprintf(fp, "%d\n", aux-> exam.start_date.year);
+        fprintf(fp, "%d\n", aux-> exam.start_date.hour);
+        fprintf(fp, "%d\n", aux-> exam.start_date.minute);
+        fprintf(fp, "%d\n", aux-> exam.end_date.day);
+        fprintf(fp, "%d\n", aux-> exam.end_date.month);
+        fprintf(fp, "%d\n", aux-> exam.end_date.year);
+        fprintf(fp, "%d\n", aux-> exam.end_date.hour);
+        fprintf(fp, "%d\n", aux-> exam.end_date.minute);
+        fprintf(fp, "%d\n", aux-> exam.n_rooms);
 
-        for (i = 0; i < aux->n_rooms; i++)
+        for (i = 0; i < aux->exam.n_rooms; i++)
         {
-            fputs(aux-> rooms[i], fp);
-            if (i < aux-> n_rooms -1) /* We dont want to put a \n in the last */
+            fputs(aux-> exam.rooms[i], fp);
+            if (i < aux-> exam.n_rooms -1) /* We dont want to put a \n in the last */
                 fputs("\n", fp);
         }
 
-        fprintf(fp, "%d\n", aux-> n_students);
+        fprintf(fp, "%d\n", aux-> exam.n_students);
+        students_aux = aux->exam.students;
+        for (i = 0; i < aux->exam.n_students; i++)
+        {
+            student_temp = (students_aux->student);
+            fputs(student_temp->student.id, fp);
+            if (i < aux-> exam.n_students -1) /* We dont want to put a \n in the last */
+                fputs("\n", fp);
+            students_aux = students_aux -> next;
+
+        }
         aux = aux -> next;
     }
     /* Dont forget to close the file */
@@ -336,13 +391,14 @@ Enode* writes_to_exams_file(Enode* exam_list)
 /* Receives the pointer to the first element of exams list   */
 /* Returns a pointer to the first element of exams list      */
 /*************************************************************/
-Enode* reads_from_exams_file(Enode* exam_list)
+Enode* reads_from_exams_file()
 {
-
+    Enode* exam_list = NULL;
     FILE *fp;   /* pointer to file data type */
     char buffer[MAX_CHAR];  /* buffer to get data from file */
-    Enode* aux = exam_list;
-    Enode* new_exam = NULL;
+    Enode* aux = NULL;
+    Exam new_exam;
+    Enode* new_exam_node;
     Course crs;
     Date sdate;
     Date edate;
@@ -371,8 +427,6 @@ Enode* reads_from_exams_file(Enode* exam_list)
         printf("DEBUG: Reads something from file...\n");
         #endif
 
-        new_exam = (Enode*) malloc (sizeof(Enode)); /* Alocates memory for new node */
-
         removes_newLine(buffer); /* Removes new line from fgets */
         crs.name = (char*) malloc (sizeof(char) * strlen(buffer)); /* Alocates memory to course.name */
         strcpy(crs.name, buffer); /* Copies buffer content over to student.degree */
@@ -383,7 +437,7 @@ Enode* reads_from_exams_file(Enode* exam_list)
         strcpy(crs.regent, buffer); /* Copies buffer content over to student.degree */
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
         removes_newLine(buffer); /* removes the new line from that line */
-        new_exam-> period = atoi(buffer);
+        new_exam.period = atoi(buffer);
 
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
         removes_newLine(buffer); /* removes the new line from that line */
@@ -419,13 +473,13 @@ Enode* reads_from_exams_file(Enode* exam_list)
 
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
         removes_newLine(buffer); /* removes the new line from that line */
-        new_exam -> n_rooms = atoi(buffer);
+        new_exam.n_rooms = atoi(buffer);
 
-        for (i = 0; i < new_exam->n_rooms; i++)
+        for (i = 0; i < new_exam.n_rooms; i++)
         {
             fgets(buffer, MAX_CHAR, fp); /* Gets next line */
             removes_newLine(buffer); /* removes the new line from that line */
-            if ((new_exam -> rooms[i] = (char*) malloc (sizeof(char) * strlen(buffer))) == NULL)
+            if ((new_exam.rooms[i] = (char*) malloc (sizeof(char) * strlen(buffer))) == NULL)
             {
                 printf("Erro: Sem memoria!\n");
                 /*DEBUG*/
@@ -434,20 +488,34 @@ Enode* reads_from_exams_file(Enode* exam_list)
                 #endif
                 return exam_list;
             }
-            strcpy(new_exam->rooms[i], buffer);
+            strcpy(new_exam.rooms[i], buffer);
         }
 
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
         removes_newLine(buffer); /* removes the new line from that line */
-        new_exam -> n_students = atoi(buffer);
+        new_exam.n_students = atoi(buffer);
 
+        new_exam.course = crs;
+        new_exam.start_date = sdate;
+        new_exam.end_date = edate;
 
-        new_exam -> course = crs;
-        new_exam -> start_date = sdate;
-        new_exam -> end_date = edate;
-        new_exam -> next = NULL; /* Sets ->next to NULL */
-        aux -> next = new_exam; /* Adds new_course to course_list */
-        aux = new_exam;
+        new_exam_node = create_exam_list();
+        new_exam_node->exam = new_exam;
+
+        if (aux == NULL)
+        {
+            if ((exam_list = create_exam_list()) == NULL)  /* Alocates memory for new node */
+                return NULL;
+
+            aux = new_exam_node;
+            exam_list = aux;
+        }
+        else
+        {
+            aux->next = new_exam_node;
+            aux = aux -> next;
+        }
+
     }
 
     fclose(fp); /* Don't forget to close the file */

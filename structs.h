@@ -52,6 +52,15 @@ typedef struct student_node
     struct student_node *next; /* Pointer to next student node */
 } Snode;
 
+/***************************************************/
+/* Node for a linked list of pointers to students  */
+/***************************************************/
+typedef struct student_pointers_node
+{
+    struct student_node *student;
+    struct student_pointers_node *next; /* Pointer to next student node */
+} Spointer;
+
 /***************************************/
 /* Node for a linked list of Courses   */
 /***************************************/
@@ -62,12 +71,10 @@ typedef struct course_node
 } Cnode;
 
 
-
-
-/***********************************/
-/* Node for a linked list of Exams */
-/***********************************/
-typedef struct exam_node
+/*******************************************/
+/* Data structure for Exam type of data */
+/*******************************************/
+typedef struct exam
 {
     Course course; /* The exam points to its course */
     Date start_date; /* The exam has a start date associated */
@@ -79,15 +86,20 @@ typedef struct exam_node
                     NORMAL- Normal Period
                     SECOND- Second Period
                     SPECIAL- Special Period */
+    struct student_pointers_node *students; /*  List of pointers to students.
+                                        The exam has a list of enrolled students
+                                    */
 
-    struct student_node *students; /*  The exam has a list of enrolled students
-                                    Pointer to the first element of the list of
-                                    students that are enrolled in the exam
-                                */
+} Exam;
+
+
+
+/***********************************/
+/* Node for a linked list of Exams */
+/***********************************/
+typedef struct exam_node
+{
+    Exam exam;
     struct exam_node *next;
 
 }Enode;
-
-Snode *student_list;
-Cnode *course_list;
-Enode *exam_list;

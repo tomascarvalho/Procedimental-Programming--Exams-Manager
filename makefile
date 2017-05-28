@@ -1,2 +1,2 @@
-Project: main.c Menu.c Files.C Students.c Courses.c Exams.c Date.c
-	 gcc -Wall -o Project main.c Menu.c Files.c Students.c Courses.c Exams.c Date.c -I.
+Project: main.c Menu.c  Students.c Courses.c Exams.c Date.c Files.c
+	 gcc -Wall -o Project main.c Menu.c UsefulFunctions.c Files.c Students.c Courses.c Exams.c Date.c -I.

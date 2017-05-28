@@ -45,9 +45,13 @@ Date new_date()
         if ((date.month == 2) && (date.day > 0)) /* If the date is February */
         {
             if (((date.year % 4) == 0) && ((date.day <=29))) /* If it's a leap year we can go up to day 29 */
+            {
                 is_valid = 1;
+            }
             else if ((date.year % 4 != 0) && (date.day<29)) /* Else, we can only go up to 28 */
+            {
                 is_valid = 1;
+            }
             else /* Else the date is invalid */
             {
                 printf("Data invalida!!");
@@ -59,21 +63,31 @@ Date new_date()
         {
             /* We can have up to 31 days*/
             if ((date.day <= 31) && (date.day >=1))
+            {
                 is_valid = 1;
+            }
             else /* else, it's invalid */
+            {
                 printf("Data invalida!!");
+            }
         }
         /* Else if the month has only 30 days */
         else if ((date.month == 4)||(date.month == 6)||(date.month == 9)||(date.month == 11))
         {
             if ((date.day <= 30)&&(date.day >= 1))
+            {
                 is_valid = 1;
+            }
             else
+            {
                 printf("Data invalida!!");
+            }
         }
         /* Else our date is invalid */
         else
+        {
             printf("Data invalida!!");
+        }
 
     }
 
@@ -92,12 +106,18 @@ Date new_date()
         if ((date.hour >= 0) && (date.hour <= 23))
         {
             if ((date.minute >= 0) || (date.minute <= 59))
+            {
                 is_valid = 1;
+            }
             else
+            {
                 printf("Data invalida!!");
+            }
         }
         else
+        {
             printf("Hora invalida!!");
+        }
 
     }
     return date;
@@ -128,12 +148,18 @@ Date get_duration(Date start_date)
         if ((hour >= 0) && (hour <= 23))
         {
             if ((minute >= 0) || (minute <= 59))
+            {
                 is_valid = 1;
+            }
             else
+            {
                 printf("Duracao invalida!!");
+            }
         }
         else
+        {
             printf("Duracao invalida!!");
+        }
 
     }
 
@@ -158,8 +184,10 @@ Date get_duration(Date start_date)
         else
         {
             if (date.year % 4 != 0)
+            {
                 date.day = 1;
                 date.month += 1;
+            }
         }
     }
 
@@ -185,4 +213,28 @@ Date get_duration(Date start_date)
 
 
     return date;
+}
+
+/*  Compares two dates.
+    Returns:    1- if d1 > d2
+                -1 if d2 > d1
+                0 if d1 == d2
+*/
+
+int date_cmp(Date d1, Date d2)
+{
+
+    if (d1.day == d2.day && d1.month == d2.month && d1.year == d2.year && d1.hour == d2.hour && d1.minute == d2.minute)
+        return 0;
+
+    else if ((d1.year > d2.year) ||
+            (d1.year == d2.year && d1.month > d2.month) ||
+            (d1.year == d2.year && d1.month == d2.month && d1.day > d2.day) ||
+            (d1.year == d2.year && d1.month == d2.month && d1.day == d2.day && d1.hour > d2.hour) ||
+            (d1.year == d2.year && d1.month == d2.month && d1.day == d2.day && d1.hour == d2.hour && d1.minute > d2.minute))
+        return 1;
+
+    else
+        return -1;
+
 }

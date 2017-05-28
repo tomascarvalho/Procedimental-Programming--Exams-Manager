@@ -1,7 +1,7 @@
 #include "structs.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <time.h>
 
 
@@ -38,45 +38,53 @@
 int sub_menu(int menu_option, Date *system_date);
 int menu(Date *system_date);
 
+/* Functions in UsefulFunctions.c*/
+void removes_newLine(char *str);
+
+
 /* Functions in Date.c file */
 void get_currentDate(Date *system_date);
 Date new_date();
 Date get_duration(Date date);
+int date_cmp(Date d1, Date d2);
 
 /* Funtions in Files.c file */
-Snode* reads_from_students_file(Snode* student_list);
+Snode* reads_from_students_file();
 Snode* writes_to_students_file(Snode* student_list);
-Cnode* reads_from_courses_file(Cnode* course_list);
+Cnode* reads_from_courses_file();
 Cnode* writes_to_courses_file(Cnode* course_list);
 Enode* writes_to_exams_file(Enode* exam_list);
-Enode* reads_from_exams_file(Enode* exam_list);
+Enode* reads_from_exams_file();
 
 /* Functions in Students.c file */
+Snode* create_student_list(Snode* list);
 Snode* new_student(Snode* student_list);
-Snode* delete_student(Snode* student_list);
-Snode* student_exists(Snode*, char s_id[]);
-Snode* insert_student(Snode* student_list, Snode* new_student);
-void removes_newLine(char *str);
+Snode* delete_student(Snode* list, char* aux_id);
+Snode* student_exists(char* s_id, Snode** before, Snode* student_list);
+Snode* insert_student(Snode* list, Snode* new_student);
+Snode* update_student(Snode* student_list);
 void destroy_student_list(Snode* student_list);
-void update_student();
-void count_students();
-void list_students();
+void count_students(Snode* student_list);
+void list_students(Snode* student_list);
 
 
 /* Functions in Courses.c file */
+Cnode* create_course_list();
 Cnode* new_course(Cnode* course_list);
-Cnode* course_exists(char c_id[]);
-Cnode* delete_course(Cnode* course_list);
+Cnode* course_exists(char* c_id, Cnode** before, Cnode* list);
+Cnode* delete_course(char* aux_id, Cnode* course_listc);
+Cnode* update_course(Cnode* course_list);
 void destroy_course_list(Cnode* course_list);
-void list_courses();
-void update_course();
+void list_courses(Cnode* course_list);
 
 /* Functions in Exams.c file */
-Enode* new_exam(Enode* exam_list);
-Enode* exam_exists(char cname[], int time);
-Enode* delete_exam(Enode* exam_list);
-int check_room(Enode* exam, char* room, Date date);
-void register_student(Enode* exam);
-void destroy_exam_list(Enode* exam_node);
-void list_exams();
-void update_exam();
+Enode* create_exam_list();
+Enode* new_exam(Enode* exam_list, Cnode* course_list);
+Enode* exam_exists(Exam exam, Enode* exam_list);
+Enode* delete_exam(Enode* exam_list, Enode* to_delete);
+Enode* update_exam(Enode* exam_list);
+Enode* register_student(Enode* exam_list);
+void insert_exam_ordered(Enode** before, Enode*, Enode* exam_list);
+int check_room(Exam exam, char* room, Date date, Enode* exam_list);
+void destroy_exam_list(Enode* exam_list);
+void list_exams(Enode* exam_list);

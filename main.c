@@ -1,5 +1,12 @@
 #include "header.h"
 
+/* TODO !!!
+    CORRIGIR FICHEIROS EXAME
+    Lista de alunos dentro de cada exame deve ser uma lista de ponteiros que
+    aponta para os alunos da lista de alunos principal!
+    Inserir exames ordenados por data !
+    No update_student deveria poder fazer update mas por o mesmo numero de estudante
+*/
 
 /******************************************************************************/
 /*                              Main function                                 */
@@ -7,55 +14,24 @@
 /******************************************************************************/
 int main(int argc, char const *argv[]) {
 
-    /* Pointer to the begining of our students list. Initialized with garbage on the first element*/
-    student_list = (Snode*) malloc (sizeof(Snode));
-    if (student_list == NULL)
-    {
-        printf("Erro: Sem memoria!\n");
-        /*DEBUG*/
-        #ifdef DEBUG
-        printf("DEBUG: NO MEMORY AVAILABLE! ERROR\n");
-        #endif
-        return 1;
-    }
-    student_list -> next = NULL;
+    /* we initialized our three linked lists*/
+    Snode* student_list = NULL;
+    Cnode* course_list = NULL;
+    Enode* exam_list = NULL;
 
-    /* Pointer to the begining of the Courses list */
-    course_list = (Cnode*) malloc (sizeof(Cnode));
-    if (course_list == NULL)
-    {
-        printf("Erro: Sem memoria!\n");
-        /*DEBUG*/
-        #ifdef DEBUG
-        printf("DEBUG: NO MEMORY AVAILABLE! ERROR\n");
-        #endif
-        return 1;
+    char aux_id[MAX_CHAR];
 
-    }
-    course_list -> next = NULL;
-
-    /* Pointer to the begining of the Courses list */
-    exam_list = (Enode*) malloc (sizeof(Enode));
-    if (exam_list == NULL)
-    {
-        printf("Erro: Sem memoria!\n");
-        /*DEBUG*/
-        #ifdef DEBUG
-        printf("DEBUG: NO MEMORY AVAILABLE! ERROR\n");
-        #endif
-        return 1;
-
-    }
-    exam_list -> next = NULL;
     /* Integers to save menu options */
     int menu_option, option;
     /* Pointer to Date data type */
     Date *system_date = (Date*) malloc(sizeof(Date));
 
     /*LOAD LISTS AND STRUCTURES FROM FILES HERE ....*/
-    student_list = reads_from_students_file(student_list);
-    course_list = reads_from_courses_file(course_list);
-    exam_list = reads_from_exams_file(exam_list);
+    student_list = reads_from_students_file();
+    course_list = reads_from_courses_file();
+    exam_list = reads_from_exams_file();
+    // exam_list = reads_from_exams_file();
+
     /* Save the system date in Date data type */
     get_currentDate(system_date);
 
@@ -86,16 +62,25 @@ int main(int argc, char const *argv[]) {
                     break;
 
                 case UPDATE_STUDENT:
-                    update_student();
+                    student_list = update_student(student_list);
                     break;
 
                 case DELETE_STUDENT:
-                    student_list = delete_student(student_list);
+                    /*DEBUG*/
+                    #ifdef DEBUG
+                    printf("DEBUG: delete_student function called\n");
+                    /* "eats" the \n from the previous input */
+                    #endif
+                    getchar();
+                    printf("Numero do estudante a apagar: ");
+                    fgets(aux_id, MAX_CHAR, stdin);
+                    removes_newLine(aux_id);
+                    student_list = delete_student(student_list, aux_id);
                     break;
 
                 case LIST_STUDENTS:
-                    count_students();
-                    list_students();
+                    count_students(student_list);
+                    list_students(student_list);
                     break;
 
                 case BACK:
@@ -113,15 +98,24 @@ int main(int argc, char const *argv[]) {
                     break;
 
                 case UPDATE_COURSE:
-                    update_course();
+                    course_list = update_course(course_list);
                     break;
 
                 case DELETE_COURSE:
-                    course_list = delete_course(course_list);
+                    /*DEBUG*/
+                    #ifdef DEBUG
+                    printf("DEBUG: delete_course function called\n");
+                    #endif
+                    getchar();
+                    printf("Nome da disciplina a apagar: ");
+                    fgets(aux_id, MAX_CHAR, stdin);
+                    removes_newLine(aux_id);
+
+                    course_list = delete_course(aux_id, course_list);
                     break;
 
                 case LIST_COURSES:
-                    list_courses();
+                    list_courses(course_list);
                     break;
 
                 case BACK:
@@ -135,19 +129,19 @@ int main(int argc, char const *argv[]) {
             switch (option)
             {
                 case NEW_EXAM:
-                    exam_list = new_exam(exam_list);
+                    exam_list = new_exam(exam_list, course_list);
                     break;
 
                 case UPDATE_EXAM:
-                    update_exam();
+                    exam_list = update_exam(exam_list);
                     break;
 
                 case DELETE_EXAM:
-                    exam_list = delete_exam(exam_list);
+                    exam_list = delete_exam(exam_list, NULL);
                     break;
 
                 case LIST_EXAMS:
-                    list_exams();
+                    list_exams(exam_list);
                     break;
 
                 case BACK:
@@ -165,13 +159,17 @@ int main(int argc, char const *argv[]) {
     printf("\nA encerrar....\n");
 
     /*SAVE SYSTEM STATE INTO FILES*/
+    exam_list = writes_to_exams_file(exam_list);
     student_list = writes_to_students_file(student_list);
     course_list = writes_to_courses_file(course_list);
-    exam_list = writes_to_exams_file(exam_list);
+    // exam_list = writes_to_exams_file(exam_list);
     /* Destroy linked lists from memory */
-    destroy_student_list(student_list);
-    destroy_course_list(course_list);
-    destroy_exam_list(exam_list);
+    if (student_list != NULL)
+        destroy_student_list(student_list);
+    if (course_list != NULL)
+        destroy_course_list(course_list);
+    if (exam_list != NULL)
+        destroy_exam_list(exam_list);
 
     return 0;
 }

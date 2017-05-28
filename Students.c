@@ -3,12 +3,26 @@
 
 /* File with functions to manipulate the list of students */
 
-
-/* Removes the new line char \n from the end of a string */
-void removes_newLine(char *str)
+/*************************************************************/
+/*               create_student_list function                */
+/* Function to create a new empty list of students           */
+/* Receives no arguments                                     */
+/* Returns a pointer to the first element of the list        */
+/*************************************************************/
+Snode* create_student_list(Snode* list)
 {
-    if (str[strlen(str)-1] == '\n')
-        str[strlen(str)-1] = '\0';
+    list = (Snode*) malloc (sizeof(Snode));
+    if (list == NULL)
+    {
+        printf("Erro: Sem memoria!\n");
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: NO MEMORY AVAILABLE! ERROR\n");
+        #endif
+        return NULL;
+    }
+    list -> next = NULL;
+    return list;
 }
 
 
@@ -20,14 +34,22 @@ void removes_newLine(char *str)
 /* and the new node to insert                                */
 /* Returns a pointer to the first element of student list    */
 /*************************************************************/
-Snode* insert_student(Snode* student_list, Snode* new_student)
+Snode* insert_student(Snode* list, Snode* new_student)
 {
-    Snode* aux = student_list;
-    while (aux->next !=  NULL)
+    Snode* aux = list;
+    if (list == NULL)
+    {
+        if ((list = create_student_list(list)) == NULL)
+            return NULL;
+        aux = list;
+    }
+    while (aux !=  NULL)
         aux = aux->next;
-    aux->next = new_student;
-    return student_list;
+    aux = new_student;
+    return list;
 }
+
+
 
 /*************************************************************/
 /*                  new_student function                     */
@@ -37,8 +59,9 @@ Snode* insert_student(Snode* student_list, Snode* new_student)
 /*************************************************************/
 Snode* new_student(Snode* student_list)
 {
-    Snode* new_student = NULL;
-    Student stdnt;
+    Snode* aux = NULL;
+    Snode* before = NULL;
+    Snode* after = NULL;
     char aux_id[MAX_CHAR], aux_degree[MAX_CHAR];
     char option;
     int aux_year, aux_regime;
@@ -49,6 +72,7 @@ Snode* new_student(Snode* student_list)
     #endif
 
     getchar();
+
     printf("\nNovo Estudante\n");
     printf("Numero de Estudante: ");
     fgets(aux_id, MAX_CHAR, stdin);
@@ -70,7 +94,7 @@ Snode* new_student(Snode* student_list)
     aux_regime = (int)(option - '0');
 
     /* If the student number exists, then we can't add it to the list */
-    if ((student_exists(student_list, aux_id)) != NULL)
+    if ((student_exists(aux_id, &before, student_list)) != NULL)
     {
         #ifdef DEBUG
         printf("DEBUG: Student exists didnt return NULL\n");
@@ -79,32 +103,47 @@ Snode* new_student(Snode* student_list)
         return student_list;
     }
 
-    /* We create the new student */
-    stdnt.id = (char*) malloc (sizeof(char) * strlen(aux_id));
-    strcpy(stdnt.id, aux_id);
-    stdnt.degree = (char*) malloc (sizeof(char) * strlen(aux_id));
-    strcpy(stdnt.degree, aux_degree);
-    stdnt.year = aux_year;
-    stdnt.regime = aux_regime;
+    #ifdef DEBUG
+    printf("DEBUG: Student exists returned NULL\n");
+    #endif
 
-    /* We alocate memory for the new student */
-    new_student = (Snode*) malloc (sizeof(Snode));
-    /* Was memory alocated?*/
-    if (new_student == NULL)
-    {
-        printf("ERRO: Sem memoria!\n");
-        /*DEBUG*/
-        #ifdef DEBUG
-        printf("FATAL ERROR: FAILED TO ALOCATE MEMORY FOR new_student NODE AT NEW_STUDENT FUNCTION\n");
-        #endif
+    if ((aux = create_student_list(aux)) == NULL)
         return student_list;
+
+
+    if (before == NULL)
+    {
+        after = student_list;
+        student_list = aux;
+        #ifdef DEBUG
+        printf("DEBUG: Inserts in the first position of the list\n");
+        #endif
+    }
+    else
+    {
+        after = before->next;
+        before->next = aux;
     }
 
 
-    new_student -> student = stdnt;
-    new_student -> next = NULL;
-    student_list = insert_student(student_list, new_student);
+    #ifdef DEBUG
+    printf("DEBUG: Allocing memory for the new student...\n");
+    #endif
+    /* We create the new student */
 
+    aux-> student.id = (char*) malloc (sizeof(char) * strlen(aux_id));
+    strcpy(aux->student.id, aux_id);
+    aux->student.degree = (char*) malloc (sizeof(char) * strlen(aux_id));
+    strcpy(aux->student.degree, aux_degree);
+    aux->student.year = aux_year;
+    aux->student.regime = aux_regime;
+    #ifdef DEBUG
+    printf("DEBUG: Setting aux->next...\n");
+    #endif
+    aux -> next = after;
+    #ifdef DEBUG
+    printf("DEBUG: Returning student_list...\n");
+    #endif
     return student_list;
 
 
@@ -117,10 +156,9 @@ Snode* new_student(Snode* student_list)
 /* Receives the pointer to the first element of student list    */
 /* Returns void                                                 */
 /****************************************************************/
-void list_students()
+void list_students(Snode* student_list)
 {
-    Snode* aux = student_list -> next;
-
+    Snode* aux = student_list;
     if (aux == NULL)
     {
         #ifdef DEBUG
@@ -154,23 +192,18 @@ void list_students()
 /* Receives no params                                                         */
 /* Returns void                                                               */
 /******************************************************************************/
-void count_students()
+void count_students(Snode* student_list)
 {
-    Snode* aux = student_list -> next;
-    int conta = 0;
+    Snode* aux = student_list;
+    int count = 0;
     printf("Numero de estudantes: ");
-    if (aux == 0)
-    {
-        printf("%d\n", conta);
-        return;
-    }
 
     while (aux != NULL)
     {
-        conta++;
+        count++;
         aux = aux -> next;
     }
-    printf("%d\n", conta);
+    printf("%d\n", count);
 
 }
 
@@ -181,36 +214,36 @@ void count_students()
 /* Receives the id of the student we want to find                             */
 /* Returns a pointer to the student found or null if the student doesnt exist */
 /******************************************************************************/
-Snode* student_exists(Snode* student_list, char s_id[])
+Snode* student_exists(char* s_id, Snode** before, Snode* student_list)
 {
 
     #ifdef DEBUG
     printf("DEBUG: studen_exists function\n");
     #endif
     Snode *aux = student_list;
-    Snode *st = NULL;
 
-    if ((aux -> next) == NULL)
-    {
-
+    if (aux == NULL)
         return NULL;
-    }
 
-    while (aux ->next != NULL)
+    while (aux != NULL)
     {
-        st = aux -> next;
+        printf("--\n");
+        printf("Iterating over id: %s\n", aux->student.id);
         /*DEBUG*/
         #ifdef DEBUG
-        printf("\nDEBUG: aux not null..");
+        printf("DEBUG: aux not null...\n");
         #endif
-        if (strcmp(st->student.id, s_id) == 0)
+        if (strcmp(aux->student.id, s_id) == 0)
         {
             /*DEBUG*/
             #ifdef DEBUG
-            printf("\nDEBUG: Student exists");
+            printf("DEBUG: Student exists\n");
             #endif
-            return st;
+            return aux;
         }
+        if (strcmp(aux->student.id, s_id) > 0)
+            return NULL;
+        *before = aux;
         aux = aux -> next;
     }
     return NULL;
@@ -223,9 +256,10 @@ Snode* student_exists(Snode* student_list, char s_id[])
 /* Receives no params                                                */
 /* Returns void                                                      */
 /*********************************************************************/
-void update_student()
+Snode* update_student(Snode* student_list)
 {
     Snode* to_update = NULL;
+    Snode* before = NULL;
     char aux_id[MAX_CHAR], aux_degree[MAX_CHAR];
     char option;
     int aux_year, aux_regime, is_unique = 1;
@@ -241,15 +275,18 @@ void update_student()
     /* Removes the \n from the aux_id (fgets function) */
     removes_newLine(aux_id);
 
-    /* Checks if student exists */
-    to_update = student_exists(student_list, aux_id);
+    // /* Checks if student exists */
+    to_update = student_exists(aux_id, &before, student_list);
     if (to_update == NULL)
     {
         /* If the student to update does not exist we return */
         printf("O estudante com esse ID nao existe\n");
-        return;
+        return student_list;
     }
+    /* we remove the node from the list */
+    student_list = delete_student(student_list, aux_id);
 
+    list_students(student_list);
     /* If it exists, we update it */
     printf("Novos dados do aluno\n");
     /* Do... */
@@ -261,10 +298,8 @@ void update_student()
         removes_newLine(aux_id);
         is_unique = 1;
 
-        if (student_exists(student_list, aux_id) != NULL)
+        if (student_exists(aux_id, &before, student_list) != NULL)
         {
-            if (student_exists(student_list, aux_id) != to_update)
-            {
                 /*DEBUG*/
                 #ifdef DEBUG
                 printf("DEBUG: The student number exists\n");
@@ -272,7 +307,6 @@ void update_student()
                 printf("Ja existe um aluno com esse ID\n");
                 is_unique = 0;
 
-            }
         }
     } while (!is_unique); /* While student ID is not unique */
 
@@ -289,16 +323,32 @@ void update_student()
         scanf(" %c", &option);
 
     } while (option < '1' || option > '5'); /* While option is not in valid range */
+
+    if ((to_update = create_student_list(to_update)) ==  NULL)
+        return student_list;
     /* Converts char to int */
     aux_regime = (int)(option - '0');
-
     to_update -> student.id = (char*) malloc (sizeof(char)*strlen(aux_id));
     strcpy(to_update->student.id, aux_id);
     to_update -> student.degree = (char*) malloc (sizeof(char)*strlen(aux_degree));
     strcpy(to_update->student.degree, aux_degree);
     to_update -> student.year = aux_year;
     to_update -> student.regime = aux_regime;
+
+    if (before == NULL)
+    {
+        printf("O before esta a null como suposto\n");
+        to_update->next = student_list;
+        student_list = to_update;
+    }
+    else
+    {
+        printf(" Meh\n");
+        to_update->next = before->next;
+        before->next = to_update;
+    }
     printf("Actualizado com sucesso\n");
+    return student_list;
 
 }
 
@@ -308,32 +358,28 @@ void update_student()
 /* Receives a pointer to the beginning of the student list           */
 /* Returns a pointer to the beginning of the student list            */
 /*********************************************************************/
-Snode* delete_student(Snode* student_list)
+Snode* delete_student(Snode* student_list, char* aux_id)
 {
     Snode* to_remove = NULL;
-    Snode* after = NULL;
-    Snode* aux = student_list;
-    char aux_id[MAX_CHAR];
-    /*DEBUG*/
-    #ifdef DEBUG
-    printf("DEBUG: delete_student function called\n");
-    /* "eats" the \n from the previous input */
-    #endif
-    getchar();
-    printf("Numero do estudante a apagar: ");
-    fgets(aux_id, MAX_CHAR, stdin);
-    removes_newLine(aux_id);
-    to_remove = student_exists(student_list, aux_id);
+    Snode* before = NULL;
+
+    to_remove = student_exists(aux_id, &before, student_list);
     if (to_remove == NULL)
     {
         printf("O estudante com esse ID nao existe\n");
         return student_list;
     }
-    while (aux -> next != to_remove)
-        aux = aux -> next;
-    after = to_remove -> next;
-    free(to_remove);
-    aux -> next = after;
+    if (before != NULL)
+    {
+        before -> next = to_remove->next;
+        free(to_remove);
+    }
+    else
+    {
+        student_list = to_remove->next;
+        free(to_remove);
+    }
+
     printf("Aluno removido com sucesso\n");
     return student_list;
 }
@@ -350,7 +396,7 @@ void destroy_student_list(Snode* student_list)
     #ifdef DEBUG
     printf("DEBUG: Destroying student's list\n");
     #endif
-    Snode* aux = student_list->next;
+    Snode* aux = student_list -> next;
     Snode* temp = NULL;
     while (aux != NULL)
     {
