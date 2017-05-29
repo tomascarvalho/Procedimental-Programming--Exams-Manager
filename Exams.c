@@ -115,7 +115,7 @@ Enode* new_exam(Enode* exam_list, Cnode* course_list)
     strcpy(new_exam.course.name, aux_name);
     new_exam.period = aux_period;
 
-    if (exam_exists(new_exam, exam_list) != NULL)
+    if (exam_exists(new_exam, exam_list, NULL) != NULL)
     {
         /*DEBUG*/
         #ifdef DEBUG
@@ -168,14 +168,16 @@ Enode* new_exam(Enode* exam_list, Cnode* course_list)
             printf("Insira um numero valido!\n");
     } while (n_rooms == 0); /* While the number is not valid */
 
-    new_exam.n_rooms = n_rooms;
+    new_exam.n_rooms = 0;
 
     while (i < n_rooms)
     {
         printf("%da sala: ", i+1);
         fgets(option_rooms, MAX_CHAR, stdin);
+        removes_newLine(option_rooms);
         if (check_room(new_exam, option_rooms, new_exam.start_date, exam_list))
         {
+
             if ((new_exam.rooms[i] = (char*) malloc (sizeof(char) * strlen(option_rooms))) == NULL)
             {
                 printf("Erro: Sem memoria!\n");
@@ -185,6 +187,7 @@ Enode* new_exam(Enode* exam_list, Cnode* course_list)
                 #endif
                 return exam_list;
             }
+            new_exam.n_rooms += 1;
             strcpy(new_exam.rooms[i], option_rooms);
             i++;
         }
@@ -219,6 +222,16 @@ int check_room(Exam exam, char* room, Date date, Enode* exam_list)
     #endif
     Enode* aux = exam_list;
     int i;
+
+    for (int i = 0; i < exam.n_rooms; i++)
+    {
+        if (strcmp(exam.rooms[i], room) == 0)
+        {
+            printf("Ja reservou esta sala para este exame!\n");
+            return 0;
+        }
+    }
+
     if (aux == NULL)
         return 1;
 
@@ -276,22 +289,23 @@ void list_exams(Enode* exam_list, Cnode* course_list, Snode* student_list)
         printf("Nao ha exames na lista\n");
         return;
     }
-    printf("Lista de Exames\n");
-    printf("\nDisciplina\tRegente\tEpoca\tData Inicio\tData Fim\tNum Inscritos\n");
+    printf("Lista de Exames\n\n\n");
+
 
     while (aux != NULL)
     {
         if (aux->exam.period == NORMAL)
-            printf("\n%s\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->exam.course.name, aux->exam.course.regent, "NORMAL", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
+            printf("Disciplina: %s\nRegente: %s\nEpoca: %s\nData Inicio: %d/%d/%d %2d:%2d\nData Fim: %d/%d/%d %2d:%2d\nNum Inscritos: %d\n", aux->exam.course.name, aux->exam.course.regent, "NORMAL", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
         else if (aux->exam.period == SECOND)
-            printf("\n%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->exam.course.name, aux->exam.course.regent, "RECURSO", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
+            printf("Disciplina: %s\nRegente: %s\nEpoca: %s\nData Inicio: %d/%d/%d %2d:%2d\nData Fim: %d/%d/%d %2d:%2d\nNum Inscritos: %d\n", aux->exam.course.name, aux->exam.course.regent, "RECURSO", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
         else if (aux->exam.period == SPECIAL)
-            printf("\n%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->exam.course.name, aux->exam.course.regent, "ESPECIAL", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
+            printf("Disciplina: %s\nRegente: %s\nEpoca: %s\nData Inicio: %d/%d/%d %2d:%2d\nData Fim: %d/%d/%d %2d:%2d\nNum Inscritos: %d\n", aux->exam.course.name, aux->exam.course.regent, "ESPECIAL", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
 
-        printf("\nSalas:\n");
+        printf("Salas: ");
         for (i = 0; i < aux->exam.n_rooms; i++)
-                printf("%s\n", aux->exam.rooms[i]);
+                printf("%s   ", aux->exam.rooms[i]);
 
+        printf("\n-------------------------------------------------------\n");
         aux = aux->next;
     }
 
@@ -352,7 +366,7 @@ void list_students_exam(Enode* exam_list)
     Spointer* student_list = NULL;
     Student student_to_list;
     char aux_name[MAX_CHAR];
-    int aux_period;
+    int aux_period, int_option;
     char option;
 
     printf("\nDisciplina do exame\n");
@@ -373,7 +387,7 @@ void list_students_exam(Enode* exam_list)
     new_exam.period = aux_period;
 
     /* Checks if course exists */
-    to_list = exam_exists(new_exam, exam_list);
+    to_list = exam_exists(new_exam, exam_list, NULL);
     if (to_list == NULL)
     {
         /* If the course to update does not exist we return */
@@ -386,7 +400,6 @@ void list_students_exam(Enode* exam_list)
         return;
     }
     printf("ALUNOS INSCRITOS NO EXAME\n\n");
-    printf("Numero Estudante\t\tCurso\t\tAno\t\ttEstatuto\n\n");
     student_list = to_list -> exam.students;
     for (int i = 0; i < to_list->exam.n_students; i++)
     {
@@ -399,29 +412,39 @@ void list_students_exam(Enode* exam_list)
 
         student_to_list = *(student_list->student);
         if(student_to_list.regime == NORMAL)
-            printf("%s\t\t%s\t\t%d\t\tNORMAL\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+            printf("Numero Estudante: %s\nCurso: %s\nAno: %d\nRegime: NORMAL\n", student_to_list.id, student_to_list.degree, student_to_list.year);
         else if(student_to_list.regime == WORKER)
-            printf("%s\t\t%s\t\t%d\t\tTRABALHADOR ESTUDANTE\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+            printf("Numero Estudante: %s\nCurso: %s\nAno: %d\nRegime: TRABALHADOR ESTUDANTE\n", student_to_list.id, student_to_list.degree, student_to_list.year);
         else if(student_to_list.regime == ERASMUS)
-            printf("%s\t\t%s\t\t%d\t\tERASMUS\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+            printf("Numero Estudante: %s\nCurso: %s\nAno: %d\nRegime: ERASMUS\n", student_to_list.id, student_to_list.degree, student_to_list.year);
         else if(student_to_list.regime == ATHLETE)
-            printf("%s\t\t%s\t\t%d\t\tATLETA ALTA COMPETICAO\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+            printf("Numero Estudante: %s\nCurso: %s\nAno: %d\nRegime: ATLETA ALTA COMPETICAO\n", student_to_list.id, student_to_list.degree, student_to_list.year);
         else if(student_to_list.regime == ASSOCIATIVE)
-            printf("%s\t\t%s\t\t%d\t\tDIRIGENTE ASSOCIATIVO\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+            printf("Numero Estudante: %s\nCurso: %s\nAno: %d\nRegime: DIRIGENTE ASSOCIATIVO\n", student_to_list.id, student_to_list.degree, student_to_list.year);
         student_list = student_list -> next;
+    }
+
+    do {
+        printf("1- Guardar lista em ficheiro de texto\n");
+        printf("0- Voltar\n");
+        option = getchar();
+    }   while(option < '0' || option > '1'); /* While the option is not valid */
+    int_option = (int)(option - '0'); /* If the option is valid, it's an integer, so we can cast it to an integer */
+    if (int_option == 1)
+    {
+        save_student_list_in_file(to_list->exam, to_list->exam.students, to_list->exam.n_students);
+    }
+
 }
 
-
-
-}
-
-Enode* exam_exists(Exam exam, Enode* exam_list)
+Enode* exam_exists(Exam exam, Enode* exam_list, Enode* to_update)
 {
     Enode* aux = exam_list;
     /*DEBUG*/
     #ifdef DEBUG
     printf("DEBUG: exam_exists checking if exam: %s in period: %d exists\n", exam.course.name, exam.period);
     #endif
+
 
     if (aux == NULL)
         return NULL;
@@ -430,7 +453,10 @@ Enode* exam_exists(Exam exam, Enode* exam_list)
     {
         if (strcmp(aux->exam.course.name, exam.course.name) == 0)
             if (aux-> exam.period == exam.period)
+            {
                 return aux;
+            }
+
         aux = aux->next;
     }
     return NULL;
@@ -477,7 +503,7 @@ Enode* update_exam(Enode* exam_list)
     new_exam.period = aux_period;
 
     /* Checks if course exists */
-    to_update = exam_exists(new_exam, exam_list);
+    to_update = exam_exists(new_exam, exam_list, NULL);
     if (to_update == NULL)
     {
         /* If the course to update does not exist we return */
@@ -498,8 +524,10 @@ Enode* update_exam(Enode* exam_list)
     aux_period = (int)(option - '0');
     new_exam.period = aux_period;
 
+    /* We need to delete the exam from the list and insert it in the correct order */
+    exam_list = delete_exam(exam_list, to_update);
 
-    if (exam_exists(new_exam, exam_list) != NULL)
+    if (exam_exists(new_exam, exam_list, to_update) != NULL)
     {
         /*DEBUG*/
         #ifdef DEBUG
@@ -527,13 +555,14 @@ Enode* update_exam(Enode* exam_list)
             printf("Insira um numero valido!\n");
     } while (n_rooms == 0); /* While the number is not valid */
 
-    to_update -> exam.n_rooms = n_rooms;
 
+    to_update -> exam.n_rooms = 0;
     memset(to_update->exam.rooms, '\0', MAX_CHAR); /* Cleans the rooms matrix... we dont want garbage date in it */
     while (i < n_rooms)
     {
         printf("%da sala: ", i+1);
         fgets(option_rooms, MAX_CHAR, stdin);
+        removes_newLine(option_rooms);
         if (check_room(to_update->exam, option_rooms, to_update->exam.start_date, exam_list))
         {
             if ((to_update -> exam.rooms[i] = (char*) malloc (sizeof(char) * strlen(option_rooms))) == NULL)
@@ -545,6 +574,7 @@ Enode* update_exam(Enode* exam_list)
                 #endif
                 return exam_list;
             }
+            to_update -> exam.n_rooms += 1;
             strcpy(to_update->exam.rooms[i], option_rooms);
             i++;
         }
@@ -552,8 +582,7 @@ Enode* update_exam(Enode* exam_list)
             printf("Sala ja reservada para um exame. Por favor, selecionar outra sala\n");
     }
 
-    /* We need to delete the exam from the list and insert it in the correct order */
-    exam_list = delete_exam(exam_list, to_update);
+
     insert_exam_ordered(&before, to_update, exam_list);
     if (before == NULL)
     {
@@ -657,7 +686,7 @@ Enode* register_student(Enode* exam_list, Cnode* course_list, Snode* student_lis
     strcpy(aux_exam.course.name, aux_name);
     aux_exam.period = aux_period;
 
-    if ((exam = exam_exists(aux_exam, exam_list)) == NULL)
+    if ((exam = exam_exists(aux_exam, exam_list, NULL)) == NULL)
     {
         /*DEBUG*/
         #ifdef DEBUG
@@ -839,7 +868,7 @@ Enode* delete_exam(Enode* exam_list, Enode* to_remove)
         to_remove_exam.course.name = (char*) malloc (sizeof(char) * strlen(aux_name));
         strcpy(to_remove_exam.course.name, aux_name);
         to_remove_exam.period = aux_period;
-        to_remove = exam_exists(to_remove_exam, exam_list);
+        to_remove = exam_exists(to_remove_exam, exam_list, NULL);
 
         if (to_remove == NULL)
         {

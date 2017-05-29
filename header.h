@@ -6,11 +6,12 @@
 
 
 /* DEBUG - Coment next line define to disable DEBUG */
-//#define DEBUG
+/*#define DEBUG */
 /* List of defined variables -> avoid magic numbers! */
 #define STUDENTS 1
 #define COURSES 2
 #define EXAMS 3
+#define SEARCHES 4
 #define NORMAL_STUDENT 1
 #define WORKER 2
 #define ATHLETE 3
@@ -32,11 +33,16 @@
 #define UPDATE_EXAM 2
 #define DELETE_EXAM 3
 #define LIST_EXAMS 4
+#define SEARCH_STUDENT 1
+#define SEARCH_COURSE 2
+#define SEARCH_EXAM 3
+#define SEARCH_STUDENT_IN_EXAM 4
 #define LIST_STUDENTS_IN_EXAM 1
 #define ADD_STUDENT_TO_EXAM 2
 #define CHECK_EXAM_ROOMS 3
 #define CAPACITY 30
 #define BACK 0
+
 
 /* Functions in Menu.c file */
 int sub_menu(int menu_option, Date *system_date);
@@ -45,6 +51,7 @@ int menu_exams();
 
 /* Functions in UsefulFunctions.c*/
 void removes_newLine(char *str);
+char* append_strings(char* str1, char* str2);
 
 
 /* Functions in Date.c file */
@@ -60,13 +67,13 @@ Cnode* reads_from_courses_file();
 Cnode* writes_to_courses_file(Cnode* course_list);
 Enode* writes_to_exams_file(Enode* exam_list);
 Enode* reads_from_exams_file(Snode* student_list);
+void save_student_list_in_file(Exam exam, Spointer* list, int n_students);
 
 /* Functions in Students.c file */
 Snode* create_student_list();
 Snode* new_student(Snode* student_list);
 Snode* delete_student(Snode* list, char* aux_id);
 Snode* student_exists(char* s_id, Snode** before, Snode* student_list);
-Snode* insert_student(Snode* list, Snode* new_student);
 Snode* update_student(Snode* student_list);
 void destroy_student_list(Snode* student_list);
 void count_students(Snode* student_list);
@@ -85,7 +92,7 @@ void list_courses(Cnode* course_list);
 /* Functions in Exams.c file */
 Enode* create_exam_list();
 Enode* new_exam(Enode* exam_list, Cnode* course_list);
-Enode* exam_exists(Exam exam, Enode* exam_list);
+Enode* exam_exists(Exam exam, Enode* exam_list, Enode* to_update);
 Enode* delete_exam(Enode* exam_list, Enode* to_delete);
 Enode* update_exam(Enode* exam_list);
 Enode* register_student(Enode* exam_list, Cnode* course_list, Snode* student_list);
@@ -97,3 +104,10 @@ void list_exams(Enode* exam_list, Cnode* course_list, Snode* student_list);
 void check_rooms_capacity(Enode* exam_list);
 void list_students_exam(Enode* exam_list);
 Spointer* create_student_in_exam_list();
+
+
+/* Functions in Searches.c file */
+void search_student(Snode* student_list);
+void search_student_in_exam(Enode* exam_list);
+void search_exam(Enode* exam_list);
+void search_course(Cnode* course_list);

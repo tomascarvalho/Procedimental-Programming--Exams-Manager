@@ -25,6 +25,7 @@ int menu(Date *system_date)
         printf("\n 1- Alunos\n");
         printf("\n 2- Disciplinas\n");
         printf("\n 3- Exames\n");
+        printf("\n 4- Pesquisas\n");
         printf("\n\n 0- Sair\t\t\t\t\tData: %d/%d/%d   Hora: %d:%d", system_date->day, system_date->month, system_date->year, system_date->hour, system_date->minute);
         printf("\n\n\t\tOpcao: ");
         scanf(" %c", &option); /* We ask the user for input */
@@ -34,10 +35,10 @@ int menu(Date *system_date)
         printf("\nDEBUG: Chosen option was --> %c\n", option);
         #endif
 
-        if (option < '0' || option >'3') /* If the option is not valid we warn the user */
+        if (option < '0' || option >'4') /* If the option is not valid we warn the user */
             printf("\nOpcao incorrecta\n");
 
-    } while (option < '0' || option >'3'); /* While the option is not valid */
+    } while (option < '0' || option >'4'); /* While the option is not valid */
 
     int_option = (int)(option - '0'); /* If the option is valid, it's an integer, so we can cast it to an integer */
 
@@ -156,8 +157,41 @@ int sub_menu(int menu_option, Date *system_date)
             #ifdef DEBUG
             printf("\nDEBUG: int_option is --> %d\n", int_option);
             #endif
-
             break;
+
+        case SEARCHES:
+            /* Do ... */
+            do
+            {
+                /* Displays submenu option for EXAMS */
+                printf("\n\nEXAMES\n\n");
+                printf("\n\t 1- Pesquisar Aluno\n");
+                printf("\n\t 2- Pesquisar Disciplina\n");
+                printf("\n\t 3- Pesquisar Exame\n");
+                printf("\n\t 4- Pesquisar Aluno em Exame\n");
+                printf("\n\n 0- Voltar\t\t\t\t\tData: %d/%d/%d   Hora: %d:%d", system_date->day, system_date->month, system_date->year, system_date->hour, system_date->minute);
+                printf("\n\n\t\tOpcao: ");
+                scanf(" %c", &option); /* We ask the user for input */
+                getchar();
+                fflush(stdin); /* Flush the buffer: "eats" the \n */
+
+                /*DEBUG*/
+                #ifdef DEBUG
+                printf("\nDEBUG: Chosen option was --> %c\n", option);
+                #endif
+
+                if (option < '0' || option >'4') /* If the option is not valid we warn the user */
+                    printf("\nOpcao incorrecta\n");
+
+            } while(option < '0' || option > '4'); /* While the option is not valid */
+
+            int_option = (int)(option - '0'); /* If the option is valid, it's an integer, so we can cast it to an integer */
+            /*DEBUG*/
+            #ifdef DEBUG
+            printf("\nDEBUG: int_option is --> %d\n", int_option);
+            #endif
+            break;
+
 
         default:
             /*DEBUG*/

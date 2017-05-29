@@ -26,31 +26,6 @@ Snode* create_student_list()
 }
 
 
-
-/*************************************************************/
-/*                 insert_student function                   */
-/* Function to create insert a student to a student list     */
-/* Receives the pointer to the first element of student list */
-/* and the new node to insert                                */
-/* Returns a pointer to the first element of student list    */
-/*************************************************************/
-Snode* insert_student(Snode* list, Snode* new_student)
-{
-    Snode* aux = list;
-    if (list == NULL)
-    {
-        if ((list = create_student_list()) == NULL)
-            return NULL;
-        aux = list;
-    }
-    while (aux !=  NULL)
-        aux = aux->next;
-    aux = new_student;
-    return list;
-}
-
-
-
 /*************************************************************/
 /*                  new_student function                     */
 /* Function to create a new student and add it to the list   */
@@ -347,7 +322,6 @@ Snode* update_student(Snode* student_list)
     }
     else
     {
-        printf(" Meh\n");
         to_update->next = before->next;
         before->next = to_update;
     }

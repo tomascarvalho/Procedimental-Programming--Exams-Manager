@@ -26,7 +26,7 @@ Date new_date()
     while(!is_valid)
     {
 
-        printf("\nPor favor insira a data (ex: 3/5/2017): \n");
+        printf("\nPor favor insira a data\n");
         printf("Dia: ");
         fgets(aux_day, MAX_CHAR, stdin);
         printf("Mes: ");
@@ -95,7 +95,7 @@ Date new_date()
 
     while (!is_valid)
     {
-        printf("\nPor favor insira as horas (ex: 10:00)\n");
+        printf("\nPor favor insira as horas\n");
         printf("Hora: ");
         fgets(aux_hour, MAX_CHAR, stdin);
         printf("Minutos: ");

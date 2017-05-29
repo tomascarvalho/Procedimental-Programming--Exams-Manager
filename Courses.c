@@ -109,11 +109,11 @@ void list_courses(Cnode* course_list)
         return;
     }
     printf("Lista de Disciplinas\n");
-    printf("\nNome\t\tRegente");
 
     while (aux != NULL)
     {
-        printf("\n%s\t\t%s", aux->course.name, aux->course.regent);
+        printf("\nNome: %s\nRegente: %s", aux->course.name, aux->course.regent);
+        printf("\n-------------------------------------------------------\n");
         aux = aux->next;
     }
 }

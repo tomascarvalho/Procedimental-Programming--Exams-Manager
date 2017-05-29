@@ -362,8 +362,7 @@ Enode* writes_to_exams_file(Enode* exam_list)
         for (i = 0; i < aux->exam.n_rooms; i++)
         {
             fputs(aux-> exam.rooms[i], fp);
-            if (i < aux-> exam.n_rooms -1) /* We dont want to put a \n in the last */
-                fputs("\n", fp);
+            fputs("\n", fp);
         }
 
         fprintf(fp, "%d\n", aux-> exam.n_students);
@@ -372,8 +371,7 @@ Enode* writes_to_exams_file(Enode* exam_list)
         {
             student_temp = *(students_aux->student);
             fputs(student_temp.id, fp);
-            if (i < aux-> exam.n_students -1) /* We dont want to put a \n in the last */
-                fputs("\n", fp);
+            fputs("\n", fp);
             students_aux = students_aux -> next;
 
         }
@@ -546,4 +544,81 @@ Enode* reads_from_exams_file(Snode* student_list)
 
     fclose(fp); /* Don't forget to close the file */
     return exam_list;
+}
+
+void save_student_list_in_file(Exam exam, Spointer* list, int n_students)
+{
+    char* filename;
+    int i;
+    Student student_temp;
+    FILE *fp;
+
+    filename = append_strings("INSCRITOS_", exam.course.name);
+    filename = append_strings(filename,  "_");
+
+    if (exam.period == NORMAL)
+        filename = append_strings(filename, "NORMAL");
+    else if (exam.period == SECOND)
+        filename = append_strings(filename, "RECURSO");
+    else
+        filename = append_strings(filename, "ESPECIAL");
+
+    filename = append_strings(filename, ".txt");
+
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("DEBUG: Opening file : %s \n", filename);
+    #endif
+
+    fp = fopen(filename, "w+"); /* Opens the file in write+ mode */
+    /* If aux is null */
+    if (list == NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: No entries on student list \n");
+        #endif
+        /* Then there is nothing to write on file and we can return */
+        fclose(fp);
+        return;
+    }
+
+    if (fp == NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: fp is Null -> Error opening file for writing\n");
+        #endif
+        printf("Erro a abrir o ficheiro para escrita\n");
+        fclose(fp);
+        return;
+    }
+
+    for (i = 0; i < n_students; i++)
+    {
+        student_temp = *(list->student);
+        fputs(student_temp.id, fp);
+        fputs(" ", fp);
+        fputs(student_temp.degree, fp);
+        fputs(" ", fp);
+
+        if (student_temp.regime == NORMAL_STUDENT)
+            fputs("NORMAL", fp);
+        else if (student_temp.regime == WORKER)
+            fputs("TRABALHADOR ESTUDANTE", fp);
+        else if (student_temp.regime == ATHLETE)
+            fputs("ATLETA", fp);
+        else if (student_temp.regime == ERASMUS)
+            fputs("ERASMUS", fp);
+        fputs("\n", fp);
+
+        list = list->next;
+    }
+
+    printf("Lista guardada no ficheiro: %s\n", filename);
+    /* Dont forget to close the file */
+    fclose(fp);
+
+
+
 }

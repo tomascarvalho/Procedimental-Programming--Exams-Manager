@@ -1,10 +1,7 @@
 #include "header.h"
 
 /* TODO !!!
-    CORRIGIR FICHEIROS EXAME
-    Lista de alunos dentro de cada exame deve ser uma lista de ponteiros que
-    aponta para os alunos da lista de alunos principal!
-    Inserir exames ordenados por data !
+    Nao devo poder marcar duas salas iguais
     No update_student deveria poder fazer update mas por o mesmo numero de estudante
 */
 
@@ -142,6 +139,32 @@ int main(int argc, char const *argv[]) {
 
                 case LIST_EXAMS:
                     list_exams(exam_list, course_list, student_list);
+                    break;
+
+                case BACK:
+                    break;
+                default:
+                    printf("Opcao invalida\n");
+            }
+        }
+        else if (menu_option == SEARCHES)
+        {
+            switch (option)
+            {
+                case SEARCH_STUDENT:
+                    search_student(student_list);
+                    break;
+
+                case SEARCH_COURSE:
+                    search_course(course_list);
+                    break;
+
+                case SEARCH_EXAM:
+                    search_exam(exam_list);
+                    break;
+
+                case SEARCH_STUDENT_IN_EXAM:
+                    search_student_in_exam(exam_list);
                     break;
 
                 case BACK:
