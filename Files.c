@@ -304,7 +304,7 @@ Enode* writes_to_exams_file(Enode* exam_list)
     FILE *fp;   /* pointer to file data type */
     Enode* aux = exam_list;
     Spointer* students_aux = NULL;
-    Snode* student_temp = NULL;
+    Student student_temp;
     int i = 0;
     /*DEBUG*/
     #ifdef DEBUG
@@ -370,8 +370,8 @@ Enode* writes_to_exams_file(Enode* exam_list)
         students_aux = aux->exam.students;
         for (i = 0; i < aux->exam.n_students; i++)
         {
-            student_temp = (students_aux->student);
-            fputs(student_temp->student.id, fp);
+            student_temp = *(students_aux->student);
+            fputs(student_temp.id, fp);
             if (i < aux-> exam.n_students -1) /* We dont want to put a \n in the last */
                 fputs("\n", fp);
             students_aux = students_aux -> next;
@@ -391,17 +391,21 @@ Enode* writes_to_exams_file(Enode* exam_list)
 /* Receives the pointer to the first element of exams list   */
 /* Returns a pointer to the first element of exams list      */
 /*************************************************************/
-Enode* reads_from_exams_file()
+Enode* reads_from_exams_file(Snode* student_list)
 {
     Enode* exam_list = NULL;
     FILE *fp;   /* pointer to file data type */
     char buffer[MAX_CHAR];  /* buffer to get data from file */
     Enode* aux = NULL;
     Exam new_exam;
-    Enode* new_exam_node;
+    Enode* new_exam_node = NULL;
     Course crs;
     Date sdate;
     Date edate;
+    Spointer* student_list_aux = NULL;
+    Snode* student_to_add = NULL;
+    Snode* useless_node = NULL;
+
     int i = 0;
     /*DEBUG*/
     #ifdef DEBUG
@@ -494,6 +498,28 @@ Enode* reads_from_exams_file()
         fgets(buffer, MAX_CHAR, fp); /* Gets next line */
         removes_newLine(buffer); /* removes the new line from that line */
         new_exam.n_students = atoi(buffer);
+
+        for (i = 0; i < new_exam.n_students; i++)
+        {
+            fgets(buffer, MAX_CHAR, fp); /* Gets next line */
+            removes_newLine(buffer); /* removes the new line from that line */
+
+            if ((student_to_add = student_exists(buffer, &useless_node, student_list)) != NULL)
+            {
+                if (student_list_aux == NULL)
+                {
+                    student_list_aux = create_student_in_exam_list();
+                    new_exam.students = student_list_aux;
+                }
+                else
+                {
+                    student_list_aux = student_list_aux -> next;
+                    student_list_aux = create_student_in_exam_list();
+                }
+                student_list_aux -> student = &(student_to_add->student);
+            }
+        }
+
 
         new_exam.course = crs;
         new_exam.start_date = sdate;

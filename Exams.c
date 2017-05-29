@@ -26,6 +26,23 @@ Enode* create_exam_list()
     return exam_list;
 }
 
+Spointer* create_student_in_exam_list()
+{
+    Spointer* list = (Spointer*) malloc (sizeof(Spointer));
+    if (list == NULL)
+    {
+        printf("Erro: Sem memoria!\n");
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: NO MEMORY AVAILABLE! ERROR\n");
+        #endif
+        return NULL;
+
+    }
+    list -> next = NULL;
+    return list;
+}
+
 /*************************************************************/
 /*                  new_exam function                        */
 /* Function to create a new exam and add it to the list      */
@@ -134,9 +151,7 @@ Enode* new_exam(Enode* exam_list, Cnode* course_list)
     strcpy(crs.regent, aux_course->course.regent);
     new_exam.course = crs;
     new_exam.period = aux_period;
-    Spointer* list_of_students = (Spointer*) malloc (sizeof(Spointer));
-    list_of_students -> next = NULL;
-    new_exam.students = list_of_students;
+    new_exam.students = create_student_in_exam_list();
     new_exam.n_students = 0;
     new_exam.start_date = aux_date;
     aux_date = get_duration(aux_date);
@@ -184,8 +199,8 @@ Enode* new_exam(Enode* exam_list, Cnode* course_list)
     insert_exam_ordered(&before, new_exam_node, exam_list);
     if (before == NULL)
     {
+        new_exam_node -> next = exam_list;
         exam_list = new_exam_node;
-        new_exam_node->next = NULL;
     }
     else
     {
@@ -248,9 +263,10 @@ int check_room(Exam exam, char* room, Date date, Enode* exam_list)
 /* Receives no params                                           */
 /* Returns void                                                 */
 /****************************************************************/
-void list_exams(Enode* exam_list)
+void list_exams(Enode* exam_list, Cnode* course_list, Snode* student_list)
 {
     Enode* aux = exam_list;
+    int option;
     int i = 0;
     if (aux == NULL)
     {
@@ -261,28 +277,151 @@ void list_exams(Enode* exam_list)
         return;
     }
     printf("Lista de Exames\n");
-    printf("\nDisciplina\t\tRegente\tEpoca\tData Inicio\tData Fim\tNum Inscritos\tSalas\n");
+    printf("\nDisciplina\tRegente\tEpoca\tData Inicio\tData Fim\tNum Inscritos\n");
 
     while (aux != NULL)
     {
         if (aux->exam.period == NORMAL)
-            printf("\n%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->exam.course.name, aux->exam.course.regent, "NORMAL", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
+            printf("\n%s\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->exam.course.name, aux->exam.course.regent, "NORMAL", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
         else if (aux->exam.period == SECOND)
             printf("\n%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->exam.course.name, aux->exam.course.regent, "RECURSO", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
         else if (aux->exam.period == SPECIAL)
             printf("\n%s\t\t%s\t%s\t%d/%d/%d %2d:%2d\t%d/%d/%d %2d:%2d\t%d\t", aux->exam.course.name, aux->exam.course.regent, "ESPECIAL", aux->exam.start_date.day, aux->exam.start_date.month, aux->exam.start_date.year, aux->exam.start_date.hour, aux->exam.start_date.minute, aux->exam.end_date.day, aux->exam.end_date.month, aux->exam.end_date.year, aux->exam.end_date.hour, aux->exam.end_date.minute, aux->exam.n_students);
+
+        printf("\nSalas:\n");
         for (i = 0; i < aux->exam.n_rooms; i++)
-            if (i == 0)
-                printf("\t\t\t\t\t\t\t\t%s\n", aux->exam.rooms[i]);
-            else
-                printf("\t\t\t\t\t\t\t\t%s\n", aux->exam.rooms[i]);
+                printf("%s\n", aux->exam.rooms[i]);
+
         aux = aux->next;
     }
+
+    do {
+        option = menu_exams();
+        getchar();
+    } while(option<0 || option > 4);
+    switch (option)
+    {
+        case LIST_STUDENTS_IN_EXAM:
+            list_students_exam(exam_list);
+            break;
+        case ADD_STUDENT_TO_EXAM:
+            exam_list = register_student(exam_list, course_list, student_list);
+            break;
+        case CHECK_EXAM_ROOMS:
+            check_rooms_capacity(exam_list);
+            break;
+        case LIST_EXAMS:
+            list_exams(exam_list, course_list, student_list);
+            break;
+    }
+}
+
+void check_rooms_capacity(Enode* exam_list)
+{
+    Enode* aux = exam_list;
+    int has_printed = 0;
+    if (aux == NULL)
+    {
+        printf("Nao ha exames!\n");
+        return;
+    }
+    while (aux != NULL)
+    {
+        if ((float)(aux->exam.n_students)/(float)(aux->exam.n_rooms) > CAPACITY)
+        {
+            has_printed = 1;
+
+            if (aux->exam.period == NORMAL)
+                printf("O exame de %s na epoca NORMAL precisa de mais %d salas para o numero de alunos inscritos\n", aux->exam.course.name, aux->exam.n_students%(aux->exam.n_rooms * CAPACITY));
+            else if (aux->exam.period == SECOND)
+                printf("O exame de %s na epoca de RECURSO precisa de mais %d salas para o numero de alunos inscritos\n", aux->exam.course.name, aux->exam.n_students%(aux->exam.n_rooms * CAPACITY));
+            else
+                printf("O exame de %s na epoca ESPECIAL precisa de mais %d salas para o numero de alunos inscritos\n", aux->exam.course.name, aux->exam.n_students%(aux->exam.n_rooms * CAPACITY));
+        }
+        aux = aux->next;
+    }
+    if (!has_printed)
+        printf("Todos os exames tem salas suficientes para o numero de alunos inscritos\n");
+
+}
+
+void list_students_exam(Enode* exam_list)
+{
+    Enode* to_list = NULL;
+    Exam new_exam;
+    Spointer* student_list = NULL;
+    Student student_to_list;
+    char aux_name[MAX_CHAR];
+    int aux_period;
+    char option;
+
+    printf("\nDisciplina do exame\n");
+    fgets(aux_name, MAX_CHAR, stdin);
+    /* Removes the \n from the aux_name (fgets function) */
+    removes_newLine(aux_name);
+    do
+    {
+        /* asks for course period */
+        printf("Epoca:\n1- Normal\n2- Recurso\n3- Especial\n");
+        scanf("%c", &option);
+        getchar();
+    } while (option < '1' || option > '3'); /* While option is not in valid range */
+    aux_period = (int)(option - '0');
+
+    new_exam.course.name = (char*) malloc (sizeof(char)*strlen(aux_name));
+    strcpy(new_exam.course.name, aux_name);
+    new_exam.period = aux_period;
+
+    /* Checks if course exists */
+    to_list = exam_exists(new_exam, exam_list);
+    if (to_list == NULL)
+    {
+        /* If the course to update does not exist we return */
+        printf("Nao existe um exame a essa disciplina nessa epoca\n");
+        return;
+    }
+    if (to_list->exam.n_students == 0)
+    {
+        printf("Nao ha alunos inscritos no exame\n");
+        return;
+    }
+    printf("ALUNOS INSCRITOS NO EXAME\n\n");
+    printf("Numero Estudante\t\tCurso\t\tAno\t\ttEstatuto\n\n");
+    student_list = to_list -> exam.students;
+    for (int i = 0; i < to_list->exam.n_students; i++)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: iterating over pointer: %p \n", student_list->student);
+        student_to_list = *(student_list->student);
+        printf("DEBUG: which has the value: %s\n", student_to_list.id);
+        #endif
+
+        student_to_list = *(student_list->student);
+        if(student_to_list.regime == NORMAL)
+            printf("%s\t\t%s\t\t%d\t\tNORMAL\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+        else if(student_to_list.regime == WORKER)
+            printf("%s\t\t%s\t\t%d\t\tTRABALHADOR ESTUDANTE\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+        else if(student_to_list.regime == ERASMUS)
+            printf("%s\t\t%s\t\t%d\t\tERASMUS\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+        else if(student_to_list.regime == ATHLETE)
+            printf("%s\t\t%s\t\t%d\t\tATLETA ALTA COMPETICAO\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+        else if(student_to_list.regime == ASSOCIATIVE)
+            printf("%s\t\t%s\t\t%d\t\tDIRIGENTE ASSOCIATIVO\n", student_to_list.id, student_to_list.degree, student_to_list.year);
+        student_list = student_list -> next;
+}
+
+
+
 }
 
 Enode* exam_exists(Exam exam, Enode* exam_list)
 {
     Enode* aux = exam_list;
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("DEBUG: exam_exists checking if exam: %s in period: %d exists\n", exam.course.name, exam.period);
+    #endif
 
     if (aux == NULL)
         return NULL;
@@ -334,6 +473,7 @@ Enode* update_exam(Enode* exam_list)
     aux_period = (int)(option - '0');
 
     new_exam.course.name = (char*) malloc (sizeof(char)*strlen(aux_name));
+    strcpy(new_exam.course.name, aux_name);
     new_exam.period = aux_period;
 
     /* Checks if course exists */
@@ -417,8 +557,8 @@ Enode* update_exam(Enode* exam_list)
     insert_exam_ordered(&before, to_update, exam_list);
     if (before == NULL)
     {
+        to_update->next = exam_list;
         exam_list = to_update;
-        to_update->next = NULL;
     }
     else
     {
@@ -441,9 +581,10 @@ void insert_exam_ordered(Enode** before, Enode* to_update, Enode* exam_list)
     {
         if (date_cmp(aux->exam.start_date, to_update->exam.start_date) > 0)
         {
-            *before = aux;
             return;
         }
+        *before = aux;
+        aux = aux->next;
     }
 }
 
@@ -454,140 +595,210 @@ void insert_exam_ordered(Enode** before, Enode* to_update, Enode* exam_list)
 /* Receives no params                                                */
 /* Returns void                                                      */
 /*********************************************************************/
-// Enode* register_student(Enode* exam_list, Cnode* course_list, Snode* student_list)
-// {
-//     char aux_name[MAX_CHAR];
-//     Cnode* useless_course = NULL;
-//     Cnode* aux_course;
-//     Snode* student_aux = create_student_list(student_aux);
-//     Snode* new_student = NULL;
-//
-//     if (exam_list == NULL)
-//     {
-//         printf("Nao ha exames onde possa inscrever o aluno\n");
-//         return;
-//     }
-//
-//     do
-//     {   /*Asks for course name... */
-//         printf("Nome da Disciplina: ");
-//         fgets(aux_name, MAX_CHAR, stdin);
-//         removes_newLine(aux_name);
-//         aux_course = course_exists(aux_name, &useless_course, course_list);
-//         if (aux_course == NULL)
-//         {
-//             printf("Nao existe uma disciplina com esse nome...\n");
-//             printf("Sair?(s/n(default nao)): ");
-//             fgets(aux_name, MAX_CHAR, stdin);
-//             removes_newLine(aux_name);
-//             if (strcmp(aux_name, "s") == 0)
-//                 return exam_list;
-//         }
-//
-//     } while(aux_course == NULL); /* While the user fails to provid a valid course name */
-//
-//     /*Do... */
-//     do
-//     {
-//         /* asks for course period */
-//         printf("Epoca:\n1- Normal\n2- Recurso\n3- Especial\n");
-//         scanf(" %c", &option);
-//         getchar();
-//         if (option < '1' || option > '3')
-//         {
-//             printf("Opcao invalida...\n");
-//             printf("Sair?(s/(default nao)): ");
-//             fgets(aux_name, MAX_CHAR, stdin);
-//             removes_newLine(aux_name);
-//             if (strcmp(aux_name, "s") == 0)
-//                 return exam_list;
-//         }
-//
-//     } while (option < '1' || option > '3'); /* While option is not in valid range */
-//
-//
-//
-//
-//
-//     printf("Numero do estudante a inscrever no exame\n");
-//     fgets(aux_name, MAX_CHAR, stdin); /* gets the student id from the user */
-//     removes_newLine(aux_name); /* removes the new line from the fgets function */
-//
-//     if ((new_student = student_exists(aux_name, &student_aux, exam_list)) != NULL)
-//     {
-//         if (student_exists_in_exam(exam, new_student->student.name) == 0)
-//         {
-//             if (exam->exam.period != SPECIAL)
-//             {
-//                 exam->exam.n_students += 1;
-//                 before->next = *new_student;
-//
-//
-//             }
-//             else
-//             {
-//                 if (student_aux ->student.regime == NORMAL_STUDENT || student_aux->student.regime == ERASMUS)
-//                 {
-//                     exam->n_students += 1;
-//                     new_student = (Snode*) malloc (sizeof(Snode));
-//                     new_student-> student = student_aux -> student;
-//                     new_student -> next = NULL;
-//                     exam->students = insert_student(exam->students, new_student);
-//                 }
-//                 else if (student_aux -> student.year == FINALIST)
-//                 {
-//                     exam->n_students += 1;
-//                     new_student = (Snode*) malloc (sizeof(Snode));
-//                     new_student-> student = student_aux -> student;
-//                     new_student -> next = NULL;
-//                     exam->students = insert_student(exam->students, new_student);
-//                 }
-//                 else
-//                 {
-//                     printf("O aluno nao tem estatuto para se poder realizar um exame de epoca especial\n");
-//                     return;
-//                 }
-//
-//             }
-//         }
-//         else
-//         {
-//             /*DEBUG*/
-//             #ifdef DEBUG
-//             printf("DEBUG: student_exists returned !null or for exam->students\n");
-//             #endif
-//             printf("O estudante ja se encontra registado no exame\n");
-//             return;
-//         }
-//     }
-//     else
-//     {
-//         /*DEBUG*/
-//         #ifdef DEBUG
-//         printf("DEBUG: student_exists returned null or for student_list\n");
-//         #endif
-//         printf("Nao existe um estudante com esse numero de estudante\n");
-//         return;
-//     }
-//     printf("Aluno inscrito com sucesso\n");
-//
-//
-// }
+Enode* register_student(Enode* exam_list, Cnode* course_list, Snode* student_list)
+{
+    char aux_name[MAX_CHAR];
+    char option;
+    int aux_period;
+    Exam aux_exam;
+    Enode* exam;
+    Cnode* useless_course = NULL;
+    Cnode* aux_course;
+    Snode* student_aux = create_student_list();
+    Snode* new_student = NULL;
+    Spointer* before = NULL;
+    Spointer* new_student_pointer = NULL;
 
-// int student_exists_in_exam(Exam exam, char* student_id)
-// {
-//     Spointer* this_exam_slist = NULL;
-//     exam_slist = exam.student_list;
-//     for (int i = 0; i < exam.n_alunos; i++)
-//     {
-//         if (strcmp(exam_slist->student.id, student_id) == 0)
-//         {
-//             return 1;
-//         }
-//         exam_slist = exam_slist -> next;
-//     }
-//     return 0;
-// }
+    if (exam_list == NULL)
+    {
+        printf("Nao ha exames onde possa inscrever o aluno\n");
+        return exam_list;
+    }
+
+    do
+    {   /*Asks for course name... */
+        printf("Nome da Disciplina: ");
+        fgets(aux_name, MAX_CHAR, stdin);
+        removes_newLine(aux_name);
+        aux_course = course_exists(aux_name, &useless_course, course_list);
+        if (aux_course == NULL)
+        {
+            printf("Nao existe uma disciplina com esse nome...\n");
+            printf("Sair?(s/n(default nao)): ");
+            fgets(aux_name, MAX_CHAR, stdin);
+            removes_newLine(aux_name);
+            if (strcmp(aux_name, "s") == 0)
+                return exam_list;
+        }
+
+    } while(aux_course == NULL); /* While the user fails to provid a valid course name */
+
+    /*Do... */
+    do
+    {
+        /* asks for course period */
+        printf("Epoca:\n1- Normal\n2- Recurso\n3- Especial\n");
+        scanf(" %c", &option);
+        getchar();
+        if (option < '1' || option > '3')
+        {
+            printf("Opcao invalida...\n");
+            printf("Sair?(s/(default nao)): ");
+            fgets(aux_name, MAX_CHAR, stdin);
+            removes_newLine(aux_name);
+            if (strcmp(aux_name, "s") == 0)
+                return exam_list;
+        }
+
+    } while (option < '1' || option > '3'); /* While option is not in valid range */
+    aux_period = (int)(option - '0');
+
+    aux_exam.course.name = (char*) malloc(sizeof(char)*strlen(aux_name));
+    strcpy(aux_exam.course.name, aux_name);
+    aux_exam.period = aux_period;
+
+    if ((exam = exam_exists(aux_exam, exam_list)) == NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: Exam does not exist!\n");
+        #endif
+        printf("Nao existe um exame para essa disciplina nesse periodo!\n");
+        return exam_list;
+    }
+
+
+
+    printf("Numero do estudante a inscrever no exame\n");
+    fgets(aux_name, MAX_CHAR, stdin); /* gets the student id from the user */
+    removes_newLine(aux_name); /* removes the new line from the fgets function */
+
+    if ((new_student = student_exists(aux_name, &student_aux, student_list)) != NULL)
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: student_exists returned not null\n");
+        printf("DEBUG: student returned was: %s\n", new_student->student.id);
+        #endif
+        if (student_exists_in_exam(exam->exam, &before, new_student->student.id) == 0)
+        {
+            /*DEBUG*/
+            #ifdef DEBUG
+            printf("DEBUG: student_exists_in_exam returned 0\n");
+            #endif
+
+            if (exam->exam.period != SPECIAL)
+            {
+                exam->exam.n_students += 1;
+                new_student_pointer = create_student_in_exam_list();
+                new_student_pointer->student = &(new_student->student);
+
+                /*DEBUG*/
+                #ifdef DEBUG
+                printf("DEBUG: adding pointer: %p to exam students\n", &new_student);
+                printf("DEBUG: student has id : %s\n", new_student->student.id);
+                #endif
+
+                if (before == NULL)
+                {
+                    /*DEBUG*/
+                    #ifdef DEBUG
+                    printf("DEBUG: before is NULL\n");
+                    #endif
+                    new_student_pointer -> next = exam->exam.students;
+                    exam->exam.students = new_student_pointer;
+                }
+                else
+                {
+                    new_student_pointer->next = before->next;
+                    before->next = new_student_pointer;
+                }
+
+            }
+            else
+            {
+                if (new_student->student.regime != NORMAL_STUDENT)
+                {
+                    exam->exam.n_students += 1;
+                    new_student_pointer = create_student_in_exam_list();
+                    new_student_pointer->student = &(new_student->student);
+                    /*DEBUG*/
+                    #ifdef DEBUG
+                    printf("DEBUG: Registering student pointer %p\n", new_student_pointer->student);
+                    #endif
+                    if (before == NULL)
+                    {
+                        exam->exam.students = new_student_pointer;
+                        new_student_pointer = exam->exam.students->next;
+                    }
+                    else
+                    {
+                        new_student_pointer->next = before->next;
+                        before->next = new_student_pointer;
+                    }
+                }
+
+                else
+                {
+                    printf("O aluno nao tem estatuto para se poder inscrever num exame de epoca especial\n");
+                    return exam_list;
+                }
+
+            }
+        }
+        else
+        {
+            /*DEBUG*/
+            #ifdef DEBUG
+            printf("DEBUG: student_exists returned !null or for exam->students\n");
+            #endif
+            printf("O estudante ja se encontra registado no exame\n");
+            return exam_list;
+        }
+    }
+    else
+    {
+        /*DEBUG*/
+        #ifdef DEBUG
+        printf("DEBUG: student_exists returned null or for student_list\n");
+        #endif
+        printf("Nao existe um estudante com esse numero de estudante\n");
+        return exam_list;
+    }
+    printf("Aluno inscrito com sucesso\n");
+    return exam_list;
+
+
+}
+
+int student_exists_in_exam(Exam exam, Spointer** before, char* student_id)
+{
+    /*DEBUG*/
+    #ifdef DEBUG
+    printf("DEBUG: student_exists_in_exam function called\n");
+    #endif
+    Spointer* this_exam_slist = NULL;
+    Student student;
+    if (exam.n_students == 0)
+        return 0;
+    this_exam_slist = exam.students;
+    for (int i = 0; i < exam.n_students; i++)
+    {
+        student = *(this_exam_slist->student);
+        if (strcmp(student.id, student_id) == 0)
+        {
+            return 1;
+        }
+        else if (strcmp(student.id, student_id) > 0)
+        {
+            return 0;
+        }
+
+        before = &this_exam_slist;
+        this_exam_slist = this_exam_slist -> next;
+    }
+    return 0;
+}
 
 
 /*********************************************************************/

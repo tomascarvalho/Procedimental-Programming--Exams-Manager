@@ -29,7 +29,7 @@ int main(int argc, char const *argv[]) {
     /*LOAD LISTS AND STRUCTURES FROM FILES HERE ....*/
     student_list = reads_from_students_file();
     course_list = reads_from_courses_file();
-    exam_list = reads_from_exams_file();
+    exam_list = reads_from_exams_file(student_list);
     // exam_list = reads_from_exams_file();
 
     /* Save the system date in Date data type */
@@ -141,7 +141,7 @@ int main(int argc, char const *argv[]) {
                     break;
 
                 case LIST_EXAMS:
-                    list_exams(exam_list);
+                    list_exams(exam_list, course_list, student_list);
                     break;
 
                 case BACK:
@@ -159,10 +159,10 @@ int main(int argc, char const *argv[]) {
     printf("\nA encerrar....\n");
 
     /*SAVE SYSTEM STATE INTO FILES*/
-    exam_list = writes_to_exams_file(exam_list);
     student_list = writes_to_students_file(student_list);
     course_list = writes_to_courses_file(course_list);
-    // exam_list = writes_to_exams_file(exam_list);
+    exam_list = writes_to_exams_file(exam_list);
+
     /* Destroy linked lists from memory */
     if (student_list != NULL)
         destroy_student_list(student_list);

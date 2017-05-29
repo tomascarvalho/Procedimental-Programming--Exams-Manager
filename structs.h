@@ -57,7 +57,7 @@ typedef struct student_node
 /***************************************************/
 typedef struct student_pointers_node
 {
-    struct student_node *student;
+    Student* student;
     struct student_pointers_node *next; /* Pointer to next student node */
 } Spointer;
 

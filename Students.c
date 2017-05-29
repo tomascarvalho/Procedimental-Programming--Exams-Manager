@@ -9,9 +9,9 @@
 /* Receives no arguments                                     */
 /* Returns a pointer to the first element of the list        */
 /*************************************************************/
-Snode* create_student_list(Snode* list)
+Snode* create_student_list()
 {
-    list = (Snode*) malloc (sizeof(Snode));
+    Snode* list = (Snode*) malloc (sizeof(Snode));
     if (list == NULL)
     {
         printf("Erro: Sem memoria!\n");
@@ -39,7 +39,7 @@ Snode* insert_student(Snode* list, Snode* new_student)
     Snode* aux = list;
     if (list == NULL)
     {
-        if ((list = create_student_list(list)) == NULL)
+        if ((list = create_student_list()) == NULL)
             return NULL;
         aux = list;
     }
@@ -107,7 +107,7 @@ Snode* new_student(Snode* student_list)
     printf("DEBUG: Student exists returned NULL\n");
     #endif
 
-    if ((aux = create_student_list(aux)) == NULL)
+    if ((aux = create_student_list()) == NULL)
         return student_list;
 
 
@@ -168,21 +168,27 @@ void list_students(Snode* student_list)
         return;
     }
     printf("Lista de Estudantes\n");
-    printf("\nID\t\t\tCurso\t\t\tAno\t\t\tRegime");
+
 
     while (aux != NULL)
     {
+        #ifdef DEBUG
+        printf("\nDEBUG: Pointer value is: %p!\n", &aux);
+        printf("\nDEBUG: Pointer to student is: %p!\n", &(aux->student));
+        #endif
         if (aux->student.regime == NORMAL_STUDENT)
-            printf("\n%s\t\t%s\t\t\t%d\t\t\t%s", aux->student.id, aux->student.degree, aux->student.year, "Normal");
+            printf("\nID: %s\nCurso: %s\nAno: %d\nRegime: %s", aux->student.id, aux->student.degree, aux->student.year, "Normal");
         if (aux->student.regime == WORKER)
-            printf("\n%s\t\t%s\t\t\t%d\t\t\t%s", aux->student.id, aux->student.degree, aux->student.year, "Trabalhador Estudante");
+            printf("\nID: %s\nCurso: %s\nAno: %d\nRegime: %s", aux->student.id, aux->student.degree, aux->student.year, "Trabalhador Estudante");
         if (aux->student.regime == ATHLETE)
-            printf("\n%s\t\t%s\t\t\t%d\t\t\t%s", aux->student.id, aux->student.degree, aux->student.year, "Atleta");
+            printf("\nID: %s\nCurso: %s\nAno: %d\nRegime: %s", aux->student.id, aux->student.degree, aux->student.year, "Atleta");
         if (aux->student.regime == ASSOCIATIVE)
-            printf("\n%s\t\t%s\t\t\t%d\t\t\t%s", aux->student.id, aux->student.degree, aux->student.year, "Dirigente Associativo");
+            printf("\nID: %s\nCurso: %s\nAno: %d\nRegime: %s", aux->student.id, aux->student.degree, aux->student.year, "Dirigente Associativo");
         if (aux->student.regime == ERASMUS)
-            printf("\n%s\t\t%s\t\t\t%d\t\t\t%s", aux->student.id, aux->student.degree, aux->student.year, "Erasmus");
+            printf("\nID: %s\nCurso: %s\nAno: %d\nRegime: %s", aux->student.id, aux->student.degree, aux->student.year, "Erasmus");
         aux = aux->next;
+
+        printf("\n-------------------------------------------------------\n");
     }
 }
 
@@ -227,10 +233,9 @@ Snode* student_exists(char* s_id, Snode** before, Snode* student_list)
 
     while (aux != NULL)
     {
-        printf("--\n");
-        printf("Iterating over id: %s\n", aux->student.id);
         /*DEBUG*/
         #ifdef DEBUG
+        printf("DEBUG: Iterating over id: %s\n", aux->student.id);
         printf("DEBUG: aux not null...\n");
         #endif
         if (strcmp(aux->student.id, s_id) == 0)
@@ -324,7 +329,7 @@ Snode* update_student(Snode* student_list)
 
     } while (option < '1' || option > '5'); /* While option is not in valid range */
 
-    if ((to_update = create_student_list(to_update)) ==  NULL)
+    if ((to_update = create_student_list()) ==  NULL)
         return student_list;
     /* Converts char to int */
     aux_regime = (int)(option - '0');
@@ -337,7 +342,6 @@ Snode* update_student(Snode* student_list)
 
     if (before == NULL)
     {
-        printf("O before esta a null como suposto\n");
         to_update->next = student_list;
         student_list = to_update;
     }
